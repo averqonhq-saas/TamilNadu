@@ -26,6 +26,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['campaigns']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['campaigns']['Insert']>
+        Relationships: []
       }
       categories: {
         Row: {
@@ -41,6 +42,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['categories']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['categories']['Insert']>
+        Relationships: []
       }
       problem_options: {
         Row: {
@@ -52,6 +54,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['problem_options']['Row'], 'id'>
         Update: Partial<Database['public']['Tables']['problem_options']['Insert']>
+        Relationships: []
       }
       users: {
         Row: {
@@ -66,6 +69,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['users']['Insert']>
+        Relationships: []
       }
       ideas: {
         Row: {
@@ -88,6 +92,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['ideas']['Row'], 'id' | 'public_id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['ideas']['Insert']>
+        Relationships: []
       }
       idea_groups: {
         Row: {
@@ -100,6 +105,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['idea_groups']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['idea_groups']['Insert']>
+        Relationships: []
       }
       idea_group_members: {
         Row: {
@@ -108,6 +114,7 @@ export interface Database {
         }
         Insert: Database['public']['Tables']['idea_group_members']['Row']
         Update: Partial<Database['public']['Tables']['idea_group_members']['Row']>
+        Relationships: []
       }
       votes: {
         Row: {
@@ -117,7 +124,8 @@ export interface Database {
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['votes']['Row'], 'id' | 'created_at'>
-        Update: never
+        Update: Partial<Database['public']['Tables']['votes']['Row']>
+        Relationships: []
       }
       email_events: {
         Row: {
@@ -130,6 +138,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['email_events']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['email_events']['Insert']>
+        Relationships: []
       }
       admin_users: {
         Row: {
@@ -140,6 +149,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['admin_users']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['admin_users']['Insert']>
+        Relationships: []
       }
       audit_logs: {
         Row: {
@@ -152,8 +162,21 @@ export interface Database {
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['audit_logs']['Row'], 'id' | 'created_at'>
-        Update: never
+        Update: Partial<Database['public']['Tables']['audit_logs']['Row']>
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

@@ -1,3 +1,49 @@
+export interface DistrictInfo {
+  name: string;
+  nameTamil: string;
+}
+
+export const TAMIL_NADU_DISTRICTS: DistrictInfo[] = [
+  { name: "Ariyalur", nameTamil: "அரியலூர்" },
+  { name: "Chengalpattu", nameTamil: "செங்கல்பட்டு" },
+  { name: "Chennai", nameTamil: "சென்னை" },
+  { name: "Coimbatore", nameTamil: "கோயம்புத்தூர்" },
+  { name: "Cuddalore", nameTamil: "கடலூர்" },
+  { name: "Dharmapuri", nameTamil: "தர்மபுரி" },
+  { name: "Dindigul", nameTamil: "திண்டுக்கல்" },
+  { name: "Erode", nameTamil: "ஈரோடு" },
+  { name: "Kallakurichi", nameTamil: "கள்ளக்குறிச்சி" },
+  { name: "Kanchipuram", nameTamil: "காஞ்சிபுரம்" },
+  { name: "Kanyakumari", nameTamil: "கன்னியாகுமரி" },
+  { name: "Karur", nameTamil: "கரூர்" },
+  { name: "Krishnagiri", nameTamil: "கிருஷ்ணகிரி" },
+  { name: "Madurai", nameTamil: "மதுரை" },
+  { name: "Mayiladuthurai", nameTamil: "மயிலாடுதுறை" },
+  { name: "Nagapattinam", nameTamil: "நாகப்பட்டினம்" },
+  { name: "Namakkal", nameTamil: "நாமக்கல்" },
+  { name: "Nilgiris", nameTamil: "நீலகிரி" },
+  { name: "Perambalur", nameTamil: "பெரம்பலூர்" },
+  { name: "Pudukkottai", nameTamil: "புதுக்கோட்டை" },
+  { name: "Ramanathapuram", nameTamil: "ராமநாதபுரம்" },
+  { name: "Ranipet", nameTamil: "ராணிப்பேட்டை" },
+  { name: "Salem", nameTamil: "சேலம்" },
+  { name: "Sivaganga", nameTamil: "சிவகங்கை" },
+  { name: "Tenkasi", nameTamil: "தென்காசி" },
+  { name: "Thanjavur", nameTamil: "தஞ்சாவூர்" },
+  { name: "Theni", nameTamil: "தேனி" },
+  { name: "Thoothukudi", nameTamil: "தூத்துக்குடி" },
+  { name: "Tiruchirappalli", nameTamil: "திருச்சிராப்பள்ளி" },
+  { name: "Tirunelveli", nameTamil: "திருநெல்வேலி" },
+  { name: "Tirupathur", nameTamil: "திருப்பத்தூர்" },
+  { name: "Tiruppur", nameTamil: "திருப்பூர்" },
+  { name: "Tiruvallur", nameTamil: "திருவள்ளூர்" },
+  { name: "Tiruvannamalai", nameTamil: "திருவண்ணாமலை" },
+  { name: "Tiruvarur", nameTamil: "திருவாரூர்" },
+  { name: "Vellore", nameTamil: "வேலூர்" },
+  { name: "Viluppuram", nameTamil: "விழுப்புரம்" },
+  { name: "Virudhunagar", nameTamil: "விருதுநகர்" },
+];
+
 export const DISTRICTS = [
   "Ariyalur",
   "Chengalpattu",
@@ -8,7 +54,7 @@ export const DISTRICTS = [
   "Dindigul",
   "Erode",
   "Kallakurichi",
-  "Kancheepuram",
+  "Kanchipuram",
   "Kanyakumari",
   "Karur",
   "Krishnagiri",
@@ -47,3 +93,4 @@ export const DISTRICT_OPTIONS = [
   "All of Tamil Nadu",
   "Not sure",
 ] as const;
+

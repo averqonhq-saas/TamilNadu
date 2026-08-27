@@ -1,26 +1,603 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Typography */
+  --font-inter: "Inter", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+
+  /* Color Palette */
+  --color-navy: #0a0e1a;
+  --color-navy-800: #141928;
+  --color-navy-700: #1e2640;
+  --color-navy-600: #2d3a5c;
+
+  --color-accent: #e85d26;
+  --color-accent-light: #f97316;
+  --color-accent-muted: #fde8dc;
+
+  --color-surface: #f8f7f4;
+  --color-surface-dark: #f0ede8;
+  --color-white: #ffffff;
+
+  --color-muted: #64748b;
+  --color-muted-light: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-dark: #cbd5e1;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ============================================
+   BASE STYLES
+   ============================================ */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-inter);
+    background-color: var(--color-surface);
+    color: var(--color-navy);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-jakarta);
+    font-weight: 700;
+    line-height: 1.2;
+    color: inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.font-jakarta {
+  font-family: var(--font-jakarta);
+}
+
+.font-inter {
+  font-family: var(--font-inter);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
+/* Section spacing */
+.section {
+  padding: 96px 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 64px 0;
+  }
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(232, 93, 38, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-navy);
+  border: 1.5px solid var(--color-border-dark);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-surface-dark);
+  border-color: var(--color-navy-600);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-muted);
+  padding: 8px 16px;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-surface-dark);
+  color: var(--color-navy);
+}
+
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 16px;
+  border-radius: var(--radius-lg);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--radius-md);
+}
+
+/* ============================================
+   CARD STYLES
+   ============================================ */
+
+.card {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+
+.card-hover {
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 20px rgba(232, 93, 38, 0.08);
+  transform: translateY(-2px);
+}
+
+.card-selected {
+  border-color: var(--color-accent);
+  background-color: rgba(232, 93, 38, 0.03);
+  box-shadow: 0 0 0 2px rgba(232, 93, 38, 0.2);
+}
+
+/* ============================================
+   INPUT STYLES
+   ============================================ */
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  background: white;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-inter);
+  font-size: 15px;
+  color: var(--color-navy);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-muted-light);
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(232, 93, 38, 0.12);
+}
+
+.input:invalid {
+  border-color: var(--color-error);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* ============================================
+   BADGE STYLES
+   ============================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.badge-accent {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.badge-navy {
+  background-color: rgba(10, 14, 26, 0.07);
+  color: var(--color-navy-600);
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-warning {
+  background-color: #fef9c3;
+  color: #a16207;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* ============================================
+   STAT CARD
+   ============================================ */
+
+.stat-card {
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.stat-number {
+  font-family: var(--font-jakarta);
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--color-navy);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-muted);
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   SECTION HEADINGS
+   ============================================ */
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-jakarta);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  color: var(--color-navy);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--color-muted);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+/* ============================================
+   LOADING / SKELETON
+   ============================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-dark) 25%,
+    var(--color-border) 50%,
+    var(--color-surface-dark) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ============================================
+   PULSE ANIMATION (voice)
+   ============================================ */
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* ============================================
+   STEP INDICATOR
+   ============================================ */
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-border-dark);
+  transition: all 0.3s ease;
+}
+
+.step-dot.active {
+  background-color: var(--color-accent);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.step-dot.completed {
+  background-color: var(--color-success);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-dark);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-light);
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+
+::selection {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ============================================
+   FOCUS TRAP FOR ACCESSIBILITY
+   ============================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   MAP STYLES
+   ============================================ */
+
+.tn-map path {
+  fill: var(--color-surface-dark);
+  stroke: white;
+  stroke-width: 1.5;
+  transition: fill 0.3s ease;
+  cursor: pointer;
+}
+
+.tn-map path:hover {
+  fill: var(--color-accent-muted);
+}
+
+.tn-map path.has-ideas {
+  fill: rgba(232, 93, 38, 0.15);
+}
+
+.tn-map path.has-many-ideas {
+  fill: rgba(232, 93, 38, 0.35);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.4s ease forwards;
+}
+
+/* Stagger children */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* ============================================
+   REDUCED MOTION — accessibility + battery
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep functional animations like skeleton shimmer off */
+  .skeleton {
+    animation: none;
+    background: var(--color-surface-dark);
+  }
+}
+
+/* ============================================
+   PERFORMANCE — contain paint/layout
+   ============================================ */
+
+/* Contain sections to reduce paint area */
+section {
+  contain: layout style;
+}
+
+/* GPU hint for animated elements */
+.animate-fade-up,
+.animate-fade-in,
+.animate-slide-in {
+  will-change: opacity, transform;
+}
+
+/* Remove will-change once animation is done */
+.animate-fade-up:is([style*="animation"]),
+.animate-fade-in:is([style*="animation"]) {
+  will-change: auto;
 }
