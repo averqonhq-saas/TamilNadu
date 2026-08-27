@@ -170,6 +170,7 @@ export default function AdminSidebar({
         localStorage.removeItem("admin_email");
         localStorage.removeItem("admin_name");
         localStorage.removeItem("admin_photo");
+        localStorage.removeItem("admin_role");
       }
     } catch {
       // Ignore

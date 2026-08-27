@@ -1,66 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Loader2,
-  AlertCircle,
-  ShieldCheck,
-  CheckCircle2,
   Lock,
-  ArrowRight,
-  Sparkles,
-  KeyRound,
   Mail,
   ExternalLink,
-  ShieldAlert,
+  ShieldCheck,
   ShieldX,
+  CheckCircle2,
 } from "lucide-react";
-import { signInWithGoogle, subscribeToAdminAuth, signOutAdmin, checkRedirectResult } from "@/lib/firebase/auth";
+import { signInWithGoogle, signOutAdmin, checkRedirectResult } from "@/lib/firebase/auth";
 import { AppIconBadge } from "@/components/brand/Logo";
 import { toast } from "sonner";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Check if returning from redirect sign-in
     checkRedirectResult().catch(() => {});
 
-    // If already authenticated and verified in session
-    const unsubscribe = subscribeToAdminAuth(async (user) => {
-      if (user?.email) {
-        try {
-          const verifyRes = await fetch("/api/admin/auth/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: user.email }),
-          });
-
-          if (verifyRes.ok) {
-            const authData = await verifyRes.json();
-            if (authData.authorized) {
-              localStorage.setItem("admin_email", user.email);
-              localStorage.setItem("admin_name", user.displayName || "Administrator");
-              localStorage.setItem("admin_role", authData.role || "ADMIN");
-              if (user.photoURL) localStorage.setItem("admin_photo", user.photoURL);
-              router.push("/admin");
-            }
-          }
-        } catch {
-          // Stay on login if verification fails
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
+    // Check for query parameters indicating security redirect
+    const errorParam = searchParams.get("error");
+    if (errorParam === "unauthorized") {
+      setError("Access Denied: Your Google account is not on the authorized administrators registry. Please sign in with an approved administrator account.");
+    } else if (errorParam === "session_expired") {
+      setError("Session expired. Please re-authenticate to continue.");
+    }
+  }, [searchParams]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -91,9 +67,12 @@ export default function AdminLoginPage() {
         if (!verifyRes.ok || !authData.authorized) {
           // Unauthorized email: Force Firebase sign out and show access denied
           await signOutAdmin();
-          localStorage.removeItem("admin_email");
-          localStorage.removeItem("admin_name");
-          localStorage.removeItem("admin_photo");
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("admin_email");
+            localStorage.removeItem("admin_name");
+            localStorage.removeItem("admin_photo");
+            localStorage.removeItem("admin_role");
+          }
 
           const denMsg = `Access Denied: Your account (${user.email}) is not registered as an authorized administrator. Please log in with an authorized administrator account or request access from the team.`;
           setError(denMsg);
@@ -103,10 +82,12 @@ export default function AdminLoginPage() {
         }
 
         toast.success(`Welcome back, ${user.displayName || user.email}!`);
-        localStorage.setItem("admin_email", user.email);
-        localStorage.setItem("admin_name", user.displayName || "Administrator");
-        localStorage.setItem("admin_role", authData.role || "ADMIN");
-        if (user.photoURL) localStorage.setItem("admin_photo", user.photoURL);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("admin_email", user.email);
+          localStorage.setItem("admin_name", user.displayName || "Administrator");
+          localStorage.setItem("admin_role", authData.role || "ADMIN");
+          if (user.photoURL) localStorage.setItem("admin_photo", user.photoURL);
+        }
         router.push("/admin");
       }
     } catch (err: any) {
@@ -140,7 +121,7 @@ export default function AdminLoginPage() {
       }
 
       setSent(true);
-      toast.success("Security login link dispatched!");
+      toast.success("Security login verification successful!");
     } catch {
       setError("Failed to verify administrator email.");
     } finally {
@@ -203,7 +184,7 @@ export default function AdminLoginPage() {
           </div>
 
           {error && (
-            <div className="p-4 bg-rose-500/15 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-rose-200 text-[13px] animate-fadeIn leading-relaxed">
+            <div className="p-4 bg-rose-500/15 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-rose-200 text-[13px] leading-relaxed">
               <ShieldX size={18} className="flex-shrink-0 mt-0.5 text-rose-400" />
               <span>{error}</span>
             </div>
@@ -215,6 +196,7 @@ export default function AdminLoginPage() {
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
               className="w-full py-4 px-5 bg-white hover:bg-[#f1f5f9] active:scale-[0.99] text-[#0a0e1a] rounded-2xl font-jakarta font-bold text-[14.5px] flex items-center justify-center gap-3 transition-all duration-200 shadow-xl shadow-black/40 hover:shadow-white/10 disabled:opacity-60 cursor-pointer group"
+              id="admin-google-signin-btn"
             >
               {googleLoading ? (
                 <Loader2 size={20} className="animate-spin text-[#0a0e1a]" />
@@ -252,9 +234,9 @@ export default function AdminLoginPage() {
             {sent ? (
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 text-center space-y-2">
                 <CheckCircle2 size={32} className="mx-auto text-emerald-400" />
-                <h3 className="font-jakarta font-bold text-white text-[15px]">Authorized Login Link Sent</h3>
+                <h3 className="font-jakarta font-bold text-white text-[15px]">Authorized Administrator Found</h3>
                 <p className="text-white/60 text-[13px]">
-                  A one-time sign in link was dispatched to <strong className="text-white font-mono">{email}</strong>.
+                  <strong className="text-white font-mono">{email}</strong> is registered. Please authenticate via the Google Sign-In button above.
                 </p>
                 <button
                   onClick={() => setSent(false)}
@@ -288,7 +270,7 @@ export default function AdminLoginPage() {
                   disabled={emailLoading || !email}
                   className="btn bg-white/10 hover:bg-white/15 border-white/15 text-white w-full h-10 text-xs font-bold justify-center rounded-xl transition-all disabled:opacity-40"
                 >
-                  {emailLoading ? <Loader2 size={15} className="animate-spin" /> : "Verify & Send Login Link"}
+                  {emailLoading ? <Loader2 size={15} className="animate-spin" /> : "Verify Administrator Account"}
                 </button>
               </form>
             )}
@@ -313,5 +295,19 @@ export default function AdminLoginPage() {
         <p>© 2026 Build Tamil Nadu • State Innovation Initiative • All unauthorized login attempts are logged and blocked.</p>
       </footer>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen w-full bg-[#06080f] flex items-center justify-center text-white">
+          <Loader2 className="w-8 h-8 animate-spin text-[#e85d26]" />
+        </div>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
   );
 }
