@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import {
   ChevronRight,
-  Mic,
+  Vote,
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
@@ -70,8 +70,8 @@ function getHeroPill(campaignStatus: CampaignStatus) {
         dotColor: "bg-[#22c55e]",
         ctaHref: "/submit",
         ctaLabel: "Share Your Problem",
-        secHref: "/submit",
-        secLabel: "Speak Idea in Tamil",
+        secHref: "/vote",
+        secLabel: "Voting Poll",
       };
   }
 }
@@ -148,7 +148,7 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
             {/* Core description */}
             <p className="text-white/70 text-[16px] sm:text-[18px] leading-relaxed max-w-2xl font-normal">
               From bus routes in Madurai to farm insights in Thanjavur — real citizens know what hurts most.
-              Submit everyday challenges via <strong className="text-white font-semibold">voice in Tamil</strong> or text.
+              Submit everyday challenges in <strong className="text-white font-semibold">Tamil or English</strong> text.
               The community votes, and open-source engineers build it.
             </p>
 
@@ -170,16 +170,10 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
                 className="btn btn-lg bg-white/[0.08] hover:bg-white/[0.14] text-white border border-white/15 backdrop-blur-md flex items-center justify-center gap-2.5 transition-all text-[15px]"
                 id="hero-cta-secondary"
               >
-                {campaignStatus === "COLLECTING" ? (
-                  <>
-                    <div className="w-6 h-6 rounded-full bg-[#e85d26]/30 flex items-center justify-center text-[#ff7a45]">
-                      <Mic size={14} />
-                    </div>
-                    <span>{pill.secLabel}</span>
-                  </>
-                ) : (
-                  <span>{pill.secLabel}</span>
-                )}
+                <div className="w-6 h-6 rounded-full bg-[#e85d26]/30 flex items-center justify-center text-[#ff7a45]">
+                  <Vote size={14} />
+                </div>
+                <span>{pill.secLabel}</span>
               </Link>
             </div>
 

@@ -327,7 +327,7 @@ export default function SubmitFlow() {
               )}
               {currentStep === 3 && (
                 <p className="text-center text-[12px] text-[#94a3b8] mt-5">
-                  ✦ Voice input supports Tamil, English, and Tanglish. You can also skip this step.
+                  ✦ You can write in Tamil, English, or Tanglish. You can also skip this step.
                 </p>
               )}
             </div>
