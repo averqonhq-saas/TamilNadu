@@ -13,12 +13,13 @@ interface AdminUserSession {
   role: string;
   name?: string;
   photo?: string;
+  token?: string;
 }
 
 export default function AdminLayoutShell({
   children,
-  userEmail: serverUserEmail = "admin@buildtamilnadu.in",
-  userRole: serverUserRole = "SUPER_ADMIN",
+  userEmail: serverUserEmail,
+  userRole: serverUserRole,
   initialStats,
 }: {
   children: React.ReactNode;
@@ -31,8 +32,12 @@ export default function AdminLayoutShell({
   const isLoginPage = pathname === "/admin/login";
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(!isLoginPage);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminSession, setAdminSession] = useState<AdminUserSession | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(serverUserEmail && serverUserRole));
+  const [adminSession, setAdminSession] = useState<AdminUserSession | null>(
+    serverUserEmail && serverUserRole
+      ? { email: serverUserEmail, role: serverUserRole }
+      : null
+  );
 
   useEffect(() => {
     // Login page manages its own view
@@ -69,7 +74,13 @@ export default function AdminLayoutShell({
             role: authData.role || "ADMIN",
             name: firebaseUser.displayName || "Administrator",
             photo: firebaseUser.photoURL || undefined,
+            token: authData.token,
           };
+
+          if (authData.token && typeof window !== "undefined") {
+            localStorage.setItem("admin_token", authData.token);
+          }
+
           setAdminSession(session);
           setIsAuthenticated(true);
           setIsCheckingAuth(false);
@@ -81,6 +92,7 @@ export default function AdminLayoutShell({
             localStorage.removeItem("admin_name");
             localStorage.removeItem("admin_photo");
             localStorage.removeItem("admin_role");
+            localStorage.removeItem("admin_token");
           }
           setIsAuthenticated(false);
           setAdminSession(null);
@@ -132,7 +144,7 @@ export default function AdminLayoutShell({
   }
 
   // If not authenticated after check, show redirect screen
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !adminSession) {
     return (
       <div className="min-h-screen w-full bg-[#06080f] text-white flex items-center justify-center p-6">
         <div className="text-center space-y-3">
@@ -143,8 +155,8 @@ export default function AdminLayoutShell({
     );
   }
 
-  const effectiveEmail = adminSession?.email || serverUserEmail;
-  const effectiveRole = adminSession?.role || serverUserRole;
+  const effectiveEmail = adminSession.email;
+  const effectiveRole = adminSession.role;
 
   return (
     <div className="flex min-h-screen bg-[#f8f7f4]">

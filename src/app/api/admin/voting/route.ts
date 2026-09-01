@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { getCampaignState, updateCampaignState } from "@/lib/data/campaign";
 import {
   getVotingCandidates,
@@ -7,8 +7,13 @@ import {
   removeVotingCandidate,
   setVotingCandidates,
 } from "@/lib/data/voting";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  // Authorize Admin Session (Requires ADMIN role or above)
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     let votes: any[] = [];
     let totalVotes = 0;
@@ -17,7 +22,7 @@ export async function GET(req: NextRequest) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
         const service = createServiceClient();
-        const { data: dbVotes } = await service.from("public_votes").select("*");
+        const { data: dbVotes } = await service.from("public_votes").select("idea_id, district");
         votes = dbVotes || [];
         totalVotes = votes.length;
 
@@ -59,6 +64,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Authorize Admin Session (Requires ADMIN role or above)
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const { action, candidate, candidateId, candidates, status, voting_start, voting_end, allow_results } = body;
@@ -114,9 +123,10 @@ export async function POST(req: NextRequest) {
             ...(allow_results !== undefined && { allow_results_before_close: allow_results }),
           }).neq("id", "00000000-0000-0000-0000-000000000000"),
           service.from("audit_logs").insert({
+            admin_id: auth.admin.id || auth.admin.email,
             action: `VOTING_CONFIG_${action || "UPDATE"}`,
             entity_type: "CAMPAIGN_VOTING",
-            metadata: { status, voting_start, voting_end, allow_results },
+            metadata: { status, voting_start, voting_end, allow_results, updated_by: auth.admin.email },
           }),
         ]);
       } catch (logErr) {

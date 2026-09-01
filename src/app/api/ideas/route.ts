@@ -3,12 +3,21 @@ import { IdeaSubmissionSchema } from "@/lib/validations/idea";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { addStoredIdea, getPublicStoredIdeas } from "@/lib/data/groups";
 
+// Simple string sanitizer to prevent XSS / script injection
+function sanitizeString(input?: string | null): string {
+  if (!input) return "";
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+
 // Rate limiting: simple in-memory store
 const submissionTracker = new Map<string, { count: number; resetAt: number }>();
 
 function getRateLimitKey(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
-  const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+  const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown-ip";
   return ip;
 }
 
@@ -31,7 +40,7 @@ function isRateLimited(key: string): boolean {
 
 export async function POST(req: NextRequest) {
   try {
-    // Rate limiting
+    // Rate limiting check
     const rateLimitKey = getRateLimitKey(req);
     if (isRateLimited(rateLimitKey)) {
       return NextResponse.json(
@@ -47,7 +56,7 @@ export async function POST(req: NextRequest) {
     if (!validation.success) {
       return NextResponse.json(
         {
-          message: "Please check your submission and try again.",
+          message: "Please check your submission details and try again.",
           errors: validation.error.flatten().fieldErrors,
         },
         { status: 400 }
@@ -55,18 +64,27 @@ export async function POST(req: NextRequest) {
     }
 
     const data = validation.data;
-    const title =
+    
+    // Sanitize user-submitted inputs
+    const rawTitle =
       data.problem_option === "other"
         ? data.problem_custom || "Custom citizen problem"
         : data.problem_option;
 
+    const title = sanitizeString(rawTitle).slice(0, 300);
+    const description = sanitizeString(data.description).slice(0, 2000);
+    const solutionDescription = sanitizeString(data.solution_description).slice(0, 2000);
+    const district = sanitizeString(data.district).slice(0, 100);
+    const name = sanitizeString(data.name).slice(0, 100);
+    const email = data.email.trim().toLowerCase();
+
     // Save in shared store
     const storedIdea = addStoredIdea({
       title,
-      description: data.description || "",
-      district: data.district,
+      description,
+      district,
       category_id: data.category_id,
-      submitter_email: data.email,
+      submitter_email: email,
       status: "SUBMITTED",
     });
 
@@ -89,8 +107,8 @@ export async function POST(req: NextRequest) {
     const { data: existingUser } = await supabase
       .from("users")
       .select("id")
-      .eq("email", data.email.toLowerCase())
-      .single();
+      .eq("email", email)
+      .maybeSingle();
 
     if (existingUser) {
       userId = existingUser.id;
@@ -98,9 +116,9 @@ export async function POST(req: NextRequest) {
       const { data: newUser, error: userError } = await supabase
         .from("users")
         .insert({
-          email: data.email.toLowerCase(),
-          name: data.name || null,
-          district: data.district,
+          email,
+          name: name || null,
+          district,
           consent: data.consent,
         })
         .select("id")
@@ -118,20 +136,22 @@ export async function POST(req: NextRequest) {
       .from("categories")
       .select("id")
       .eq("slug", data.category_id)
-      .single();
+      .maybeSingle();
 
-    // 3. Insert idea
+    // 3. Insert idea strictly with default SUBMITTED and PRIVATE status
     const { data: idea, error: ideaError } = await supabase
       .from("ideas")
       .insert({
         user_id: userId,
         category_id: category?.id || null,
         title,
-        description: data.description || null,
-        solution_description: data.solution_description || null,
-        district: data.district,
+        description: description || null,
+        solution_description: solutionDescription || null,
+        district,
         status: "SUBMITTED",
         visibility: "PRIVATE",
+        admin_notes: null,
+        similarity_group_id: null,
         public_id: storedIdea.public_id,
       })
       .select("id, public_id")
@@ -150,7 +170,7 @@ export async function POST(req: NextRequest) {
           status: "PENDING",
         });
       } catch {
-        // Ignore non-critical audit insert failure
+        // Non-critical audit insert failure
       }
     }
 
@@ -177,9 +197,9 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get("category")?.toLowerCase();
-    const district = searchParams.get("district")?.toLowerCase();
-    const search = searchParams.get("search")?.toLowerCase().trim();
+    const category = sanitizeString(searchParams.get("category")?.toLowerCase());
+    const district = sanitizeString(searchParams.get("district")?.toLowerCase());
+    const search = sanitizeString(searchParams.get("search")?.toLowerCase().trim());
     const page = parseInt(searchParams.get("page") || "1");
     const limit = Math.min(parseInt(searchParams.get("limit") || "12"), 50);
     const offset = (page - 1) * limit;
@@ -191,6 +211,7 @@ export async function GET(req: NextRequest) {
       try {
         const supabase = createServiceClient();
 
+        // STRICT PUBLIC QUERY: NEVER select email, user_id, admin_notes, or PII
         let query = supabase
           .from("ideas")
           .select(
@@ -252,7 +273,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Fallback to shared in-memory store if DB has no public ideas yet or in local mode
+    // Fallback to shared in-memory store if DB has no public ideas yet
     if (publicIdeas.length === 0) {
       let filtered = getPublicStoredIdeas();
 

@@ -3,11 +3,14 @@ import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server
 import {
   getStoredGroups,
   createStoredGroup,
-  ManualGroup,
   GroupStatus,
 } from "@/lib/data/groups";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") as GroupStatus | null;
@@ -107,6 +110,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const {
@@ -158,6 +164,14 @@ export async function POST(req: NextRequest) {
           }));
           await supabase.from("idea_group_members").insert(memberRows);
         }
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "IDEA_GROUP_CREATED",
+          entity_type: "IDEA_GROUP",
+          entity_id: dbGroup?.id || newGroup.id,
+          metadata: { title: newGroup.title, created_by: auth.admin.email },
+        });
       } catch (dbErr) {
         console.warn("Supabase group insert warning:", dbErr);
       }

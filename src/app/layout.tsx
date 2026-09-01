@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     "build for Tamil Nadu",
   ],
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://buildtamilnadu.in"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://tamil-nadu-five.vercel.app"
   ),
   openGraph: {
     title: "Build Tamil Nadu — What Should We Build for Tamil Nadu?",
     description:
       "A citizen-driven technology initiative. Tell us the problem. Tamil Nadu decides what we build.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://buildtamilnadu.in",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://tamil-nadu-five.vercel.app",
     siteName: "Build Tamil Nadu",
     images: [
       {

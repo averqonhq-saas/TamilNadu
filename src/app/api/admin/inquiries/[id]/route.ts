@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateInquiry, deleteInquiry } from "@/lib/data/inquiries";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
     const body = await req.json();
@@ -22,6 +26,14 @@ export async function PATCH(
       try {
         const supabase = createServiceClient();
         await supabase.from("inquiries").update(updates).eq("id", id);
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "INQUIRY_UPDATED",
+          entity_type: "INQUIRY",
+          entity_id: id,
+          metadata: { updated_by: auth.admin.email, updates },
+        });
       } catch (dbErr) {
         console.warn("DB update inquiry fallback:", dbErr);
       }
@@ -48,6 +60,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
     const deleted = deleteInquiry(id);
@@ -56,6 +71,14 @@ export async function DELETE(
       try {
         const supabase = createServiceClient();
         await supabase.from("inquiries").delete().eq("id", id);
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "INQUIRY_DELETED",
+          entity_type: "INQUIRY",
+          entity_id: id,
+          metadata: { deleted_by: auth.admin.email },
+        });
       } catch (dbErr) {
         console.warn("DB delete inquiry fallback:", dbErr);
       }

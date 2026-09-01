@@ -4,10 +4,13 @@ import {
   getStoredCategories,
   addStoredCategory,
   deleteStoredCategory,
-  AdminCategory,
 } from "@/lib/data/categories";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     let categories = getStoredCategories();
 
@@ -64,6 +67,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const { name, nameTamil, slug, icon, color, description, topProblem } = body;
@@ -94,6 +100,14 @@ export async function POST(req: NextRequest) {
           active: true,
           sort_order: 10,
         });
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "CATEGORY_CREATED",
+          entity_type: "CATEGORY",
+          entity_id: created.slug,
+          metadata: { name: created.name, created_by: auth.admin.email },
+        });
       } catch (dbErr) {
         console.warn("Supabase category insert warning:", dbErr);
       }
@@ -114,6 +128,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
@@ -138,6 +155,14 @@ export async function DELETE(req: NextRequest) {
           query = query.or(`id.eq.${id},slug.eq.${id}`);
         }
         await query;
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "CATEGORY_DELETED",
+          entity_type: "CATEGORY",
+          entity_id: id,
+          metadata: { deleted_by: auth.admin.email },
+        });
       } catch (dbErr) {
         console.warn("Supabase category delete warning:", dbErr);
       }

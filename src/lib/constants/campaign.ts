@@ -199,5 +199,5 @@ export const DEFAULT_CAMPAIGN = {
 };
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://buildtamilnadu.in";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://tamil-nadu-five.vercel.app";
 

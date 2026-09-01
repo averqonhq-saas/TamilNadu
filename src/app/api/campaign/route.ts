@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCampaignState, updateCampaignState } from "@/lib/data/campaign";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET() {
   try {
@@ -38,6 +39,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  // Authorize Admin Session (Strictly ADMIN or SUPER_ADMIN required to change campaign state)
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const updated = updateCampaignState(body);
@@ -58,6 +63,13 @@ export async function POST(req: NextRequest) {
             }),
           })
           .neq("id", "00000000-0000-0000-0000-000000000000"); // update active campaign
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "CAMPAIGN_STATUS_CHANGED",
+          entity_type: "CAMPAIGN",
+          metadata: { updated_by: auth.admin.email, new_state: updated },
+        });
       } catch (err) {
         console.warn("Supabase campaign update fallback:", err);
       }

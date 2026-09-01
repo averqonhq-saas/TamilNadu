@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getStoredIdeas, GroupableIdea } from "@/lib/data/groups";
+import { getStoredIdeas } from "@/lib/data/groups";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  // 1. Authorize Admin Session (Requires REVIEWER role or above)
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search")?.toLowerCase().trim() || "";

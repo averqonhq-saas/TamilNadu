@@ -1,10 +1,43 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Sparkles, Eye, ShieldCheck, Flame, Radio, ExternalLink } from "lucide-react";
-import { DEFAULT_CAMPAIGN } from "@/lib/constants/campaign";
-import { SidebarStats } from "@/components/admin/AdminSidebar";
+import { ExternalLink } from "lucide-react";
+
+interface HeaderStats {
+  ideasCount: number;
+  groupsCount: number;
+  shortlistCount: number;
+  votingBadge?: string;
+  categoriesCount: number;
+  activeDistrictsCount: number;
+  totalDistricts: number;
+  adminsCount: number;
+  inquiriesCount?: number;
+}
+
+const DEFAULT_STATS: HeaderStats = {
+  ideasCount: 0,
+  groupsCount: 0,
+  shortlistCount: 0,
+  categoriesCount: 8,
+  activeDistrictsCount: 0,
+  totalDistricts: 38,
+  adminsCount: 1,
+};
+
+function safeNumber(val: unknown, fallback: number = 0): number {
+  if (typeof val === "number" && isFinite(val)) return val;
+  return fallback;
+}
+
+function safeFormatNumber(val: unknown, fallback: string = "0"): string {
+  const n = safeNumber(val);
+  const [whole, fraction] = String(n).split(".");
+  if (!whole) return fallback;
+
+  const formattedWhole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return fraction ? `${formattedWhole}.${fraction}` : formattedWhole;
+}
 
 export default function AdminControlRoomHeader({
   adminEmail,
@@ -13,29 +46,29 @@ export default function AdminControlRoomHeader({
 }: {
   adminEmail?: string;
   adminRole?: string;
-  initialStats?: SidebarStats;
+  initialStats?: HeaderStats;
 }) {
-  const [stats, setStats] = useState<SidebarStats>(
-    initialStats || {
-      ideasCount: 0,
-      groupsCount: 0,
-      shortlistCount: 0,
-      votingBadge: undefined,
-      categoriesCount: 8,
-      activeDistrictsCount: 0,
-      totalDistricts: 38,
-      adminsCount: 1,
-    }
-  );
+  const [stats, setStats] = useState<HeaderStats>(() => ({
+    ...DEFAULT_STATS,
+    ...(initialStats || {}),
+  }));
 
   useEffect(() => {
     fetch("/api/admin/sidebar-stats")
       .then((r) => r.json())
       .then((data) => {
-        if (data) setStats(data);
+        if (data && typeof data.ideasCount === "number") {
+          setStats((prev) => ({ ...prev, ...data }));
+        }
       })
       .catch(() => {});
   }, []);
+
+  const count = safeNumber(stats?.ideasCount);
+  const activeDistricts = safeNumber(stats?.activeDistrictsCount);
+  const totalDistricts = safeNumber(stats?.totalDistricts, 38);
+  const badge = stats?.votingBadge;
+  const badgeText = typeof badge === "string" && badge.trim() ? "POLL " + badge.trim() : "PLATFORM LIVE";
 
   return (
     <header className="bg-white border-b border-[#e2e8f0] px-6 lg:px-8 py-3 sticky top-0 z-40 shadow-xs flex flex-wrap items-center justify-between gap-4">
@@ -55,7 +88,7 @@ export default function AdminControlRoomHeader({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span>{stats.votingBadge ? `POLL ${stats.votingBadge}` : "PLATFORM LIVE"}</span>
+          <span>{badgeText}</span>
         </div>
       </div>
 
@@ -63,12 +96,12 @@ export default function AdminControlRoomHeader({
       <div className="flex items-center gap-4 text-xs font-semibold text-[#64748b]">
         <div className="hidden md:flex items-center gap-3 text-[12.5px]">
           <span className="text-[#0a0e1a] font-bold font-mono">
-            {stats.ideasCount.toLocaleString()}
+            {safeFormatNumber(count)}
           </span>
-          <span>{stats.ideasCount === 1 ? "idea" : "ideas"}</span>
+          <span>{count === 1 ? "idea" : "ideas"}</span>
           <span>•</span>
           <span className="text-[#0a0e1a] font-bold font-mono">
-            {stats.activeDistrictsCount}/{stats.totalDistricts}
+            {String(activeDistricts)}/{String(totalDistricts)}
           </span>
           <span>districts</span>
         </div>

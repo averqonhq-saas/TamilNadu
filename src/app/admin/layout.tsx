@@ -1,5 +1,8 @@
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { cookies, headers } from "next/headers";
+import { NextRequest } from "next/server";
+import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import AdminLayoutShell from "@/components/admin/AdminLayoutShell";
+import { verifyAdminToken, AuthenticatedAdmin } from "@/lib/auth/admin-auth";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,13 +10,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const MASTER_ADMIN_EMAIL = "muneeswaranmd2004@gmail.com";
+
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let userEmail = "admin@buildtamilnadu.in";
-  let userRole = "SUPER_ADMIN";
+  let userEmail: string | null = null;
+  let userRole: string | null = null;
+
   let initialStats = {
     ideasCount: 0,
     groupsCount: 0,
@@ -26,22 +32,19 @@ export default async function AdminLayout({
   };
 
   try {
-    if (isSupabaseConfigured()) {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("btn_admin_session")?.value;
 
-      if (user?.email) {
-        userEmail = user.email;
-        const { data: adminUser } = await supabase
-          .from("admin_users")
-          .select("role")
-          .eq("email", user.email)
-          .single();
-
-        if (adminUser?.role) {
-          userRole = adminUser.role;
-        }
+    if (sessionToken) {
+      const payload = verifyAdminToken(sessionToken);
+      if (payload?.email) {
+        userEmail = payload.email.trim().toLowerCase();
+        userRole = payload.role || "REVIEWER";
       }
+    }
+
+    if (isSupabaseConfigured()) {
+      const supabase = createServiceClient();
 
       const [
         { count: ideasTotal },
@@ -73,13 +76,13 @@ export default async function AdminLayout({
       }
     }
   } catch {
-    // Development or fallback session
+    // Session fallback
   }
 
   return (
     <AdminLayoutShell
-      userEmail={userEmail}
-      userRole={userRole}
+      userEmail={userEmail || undefined}
+      userRole={userRole || undefined}
       initialStats={initialStats}
     >
       {children}

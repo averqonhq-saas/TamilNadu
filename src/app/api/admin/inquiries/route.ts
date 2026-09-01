@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoredInquiries, InquiryStatus, InquiryType } from "@/lib/data/inquiries";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") as InquiryType | null;

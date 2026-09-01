@@ -17,6 +17,8 @@ import {
   Eye,
   Edit,
   AlertCircle,
+  KeyRound,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,11 +65,17 @@ export default function AdminAdminsPage() {
   const [newRole, setNewRole] = useState("ADMIN");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resettingTarget, setResettingTarget] = useState<AdminUser | null>(null);
+  const [resetReason, setResetReason] = useState("");
 
   const fetchAdmins = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/admins");
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch("/api/admin/admins", { headers });
       if (res.ok) {
         const data = await res.json();
         if (data.admins) setAdmins(data.admins);
@@ -93,9 +101,13 @@ export default function AdminAdminsPage() {
 
     setIsSubmitting(true);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch("/api/admin/admins", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ email: newEmail, role: newRole }),
       });
 
@@ -128,8 +140,13 @@ export default function AdminAdminsPage() {
 
     setDeletingId(admin.id);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`/api/admin/admins?id=${admin.id}&email=${encodeURIComponent(admin.email)}`, {
         method: "DELETE",
+        headers,
       });
 
       if (!res.ok) {
@@ -146,20 +163,52 @@ export default function AdminAdminsPage() {
     }
   };
 
+  const handleReset2FA = async () => {
+    if (!resettingTarget) return;
+
+    setIsSubmitting(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch("/api/admin/auth/2fa/manage", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          action: "SUPER_ADMIN_RESET",
+          targetEmail: resettingTarget.email,
+          reason: resetReason || "Lost 2FA device",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to reset 2FA");
+
+      toast.success(`2FA reset for ${resettingTarget.email}!`);
+      setResettingTarget(null);
+      setResetReason("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to reset 2FA");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="p-6 lg:p-8 max-w-6xl space-y-8">
+    <div className="p-6 lg:p-8 max-w-6xl space-y-8 select-none">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="badge badge-accent text-xs">Security &amp; Permissions</span>
-            <span className="text-xs text-[#64748b]">• Role-Based Access Control</span>
+            <span className="text-xs text-[#64748b]">• Role-Based Access Control &amp; 2FA Management</span>
           </div>
           <h1 className="font-jakarta font-extrabold text-[28px] text-[#0a0e1a]">
             Admin Access &amp; Team Management
           </h1>
           <p className="text-[#64748b] text-[15px]">
-            Manage authorized Google Accounts permitted to access this mission control center.
+            Manage authorized Google Accounts permitted to access this mission control center and 2FA resets.
           </p>
         </div>
 
@@ -190,7 +239,7 @@ export default function AdminAdminsPage() {
             Master Administrator Protection Active
           </span>
           <p className="text-[#64748b] leading-relaxed">
-            Primary Owner protection is active. Only users explicitly granted access below can log in to this portal with their Google Account.
+            Primary Owner protection is active. Only users explicitly granted access below can log in with their Google Account and 2FA.
           </p>
         </div>
       </div>
@@ -247,7 +296,7 @@ export default function AdminAdminsPage() {
                             )}
                           </div>
                           <span className="text-xs text-[#94a3b8] font-mono">
-                            Google Verified Identity
+                            Google + 2FA Verified
                           </span>
                         </div>
                       </div>
@@ -266,7 +315,7 @@ export default function AdminAdminsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
                         <CheckCircle2 size={14} />
-                        <span>Active &amp; Authorized</span>
+                        <span>2FA Protected</span>
                       </div>
                     </td>
 
@@ -282,15 +331,26 @@ export default function AdminAdminsPage() {
                       {isMaster ? (
                         <span className="text-xs font-bold text-[#94a3b8] italic">Permanent</span>
                       ) : (
-                        <button
-                          onClick={() => handleRevokeAdmin(adm)}
-                          disabled={deletingId === adm.id}
-                          className="btn btn-ghost text-xs font-bold text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-3 py-1.5 rounded-lg inline-flex items-center gap-1 transition-colors"
-                          title="Revoke Admin Access"
-                        >
-                          <Trash2 size={13} />
-                          <span>Revoke Access</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setResettingTarget(adm)}
+                            className="btn btn-ghost text-xs font-bold text-amber-600 hover:bg-amber-50 px-2.5 py-1.5 rounded-lg inline-flex items-center gap-1"
+                            title="Reset 2FA for this user"
+                          >
+                            <RotateCcw size={13} />
+                            <span>Reset 2FA</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleRevokeAdmin(adm)}
+                            disabled={deletingId === adm.id}
+                            className="btn btn-ghost text-xs font-bold text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg inline-flex items-center gap-1 transition-colors"
+                            title="Revoke Admin Access"
+                          >
+                            <Trash2 size={13} />
+                            <span>Revoke</span>
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -303,8 +363,8 @@ export default function AdminAdminsPage() {
 
       {/* Grant Admin Access Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#e2e8f0] space-y-6 relative animate-scaleUp">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#e2e8f0] space-y-6 relative">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-5 right-5 text-[#94a3b8] hover:text-[#0a0e1a] transition-colors p-1"
@@ -374,6 +434,65 @@ export default function AdminAdminsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Super Admin 2FA Reset Modal */}
+      {resettingTarget && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#e2e8f0] space-y-5 relative">
+            <button
+              onClick={() => setResettingTarget(null)}
+              className="absolute top-5 right-5 text-[#94a3b8] hover:text-[#0a0e1a] transition-colors p-1"
+            >
+              <X size={18} />
+            </button>
+
+            <div>
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 mb-3">
+                <RotateCcw size={22} />
+              </div>
+              <h2 className="font-jakarta font-extrabold text-[20px] text-[#0a0e1a]">
+                Reset 2FA Device
+              </h2>
+              <p className="text-xs text-[#64748b] mt-1">
+                Resetting 2FA for <strong className="text-[#0a0e1a] font-mono">{resettingTarget.email}</strong> will require them to set up two-factor authentication again on their next login.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[#0a0e1a] uppercase tracking-wider mb-1.5">
+                  Reason for 2FA Reset (Audited)
+                </label>
+                <input
+                  type="text"
+                  value={resetReason}
+                  onChange={(e) => setResetReason(e.target.value)}
+                  placeholder="e.g. User lost authenticator phone"
+                  className="input h-11 text-sm bg-[#f8f7f4] w-full"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setResettingTarget(null)}
+                  className="btn btn-secondary text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset2FA}
+                  disabled={isSubmitting}
+                  className="btn bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-5"
+                >
+                  {isSubmitting ? "Resetting 2FA..." : "Confirm 2FA Reset"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

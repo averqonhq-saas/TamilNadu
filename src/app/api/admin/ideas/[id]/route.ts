@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { AdminIdeaUpdateSchema } from "@/lib/validations/idea";
 import { updateStoredIdea, getStoredIdeas } from "@/lib/data/groups";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
+  // Authorize Admin Session (Requires REVIEWER role or above)
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
     const body = await req.json();
@@ -26,7 +31,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const validation = AdminIdeaUpdateSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ message: "Invalid update data", errors: validation.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid update data", errors: validation.error.flatten() },
+        { status: 400 }
+      );
     }
 
     const supabase = createServiceClient();
@@ -45,17 +53,21 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       throw error;
     }
 
-    // Log audit action
+    // Log audit action with authenticated admin ID/Email
     try {
       await supabase.from("audit_logs").insert({
-        admin_id: "system",
+        admin_id: auth.admin.id || auth.admin.email,
         action: "IDEA_UPDATE",
         entity_type: "idea",
         entity_id: id,
-        metadata: validation.data,
+        metadata: {
+          updater: auth.admin.email,
+          role: auth.admin.role,
+          changes: validation.data,
+        },
       });
-    } catch {
-      // Non-critical audit log
+    } catch (auditErr) {
+      console.warn("Non-critical audit log insert error:", auditErr);
     }
 
     return NextResponse.json({ success: true });
@@ -66,6 +78,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
+  // Authorize Admin Session (Requires REVIEWER role or above)
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
 
@@ -92,23 +108,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         });
       }
 
-      return NextResponse.json({
-        id,
-        public_id: `TN-2026-${id.slice(0, 5)}`,
-        title: "Real-time Citizen Submission",
-        problem_description: "Citizen reported problem details across local district.",
-        solution_idea: "Proposed technological solution submitted by resident.",
-        category_id: "general",
-        category_name: "General",
-        district: "Chennai",
-        scope: "State-wide",
-        status: "SUBMITTED",
-        visibility: "PRIVATE",
-        internal_notes: "",
-        submitter_email: "citizen.feedback@tamilnadu.in",
-        submitter_name: "Citizen Contributor",
-        created_at: new Date().toISOString(),
-      });
+      return NextResponse.json({ message: "Idea not found" }, { status: 404 });
     }
 
     const supabase = createServiceClient();

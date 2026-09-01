@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { TAMIL_NADU_DISTRICTS } from "@/lib/constants/districts";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const districtStats: Record<string, { count: number; topCategory: string; voterTurnout: number }> = {};
 
@@ -21,15 +25,6 @@ export async function GET(req: NextRequest) {
       const { data: ideasData } = await supabase
         .from("ideas")
         .select("district, category_id, categories(name)");
-
-      // Fetch votes by district if available
-      let votesData: Array<{ voter_identifier?: string }> | null = null;
-      try {
-        const { data } = await supabase.from("votes").select("voter_identifier");
-        votesData = data;
-      } catch {
-        // Votes table fallback
-      }
 
       if (ideasData) {
         const categoryCounts: Record<string, Record<string, number>> = {};

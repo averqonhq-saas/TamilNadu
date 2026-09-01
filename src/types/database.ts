@@ -21,6 +21,7 @@ export interface Database {
           voting_end: string | null
           submission_limit: number | null
           announcement_text: string | null
+          allow_results_before_close: boolean
           created_at: string
           updated_at: string
         }
@@ -127,6 +128,22 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['votes']['Row']>
         Relationships: []
       }
+      public_votes: {
+        Row: {
+          id: string
+          campaign_id: string | null
+          idea_id: string
+          voter_hash: string
+          voter_email_masked: string | null
+          district: string | null
+          client_ip_hash: string | null
+          user_agent_hash: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['public_votes']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['public_votes']['Row']>
+        Relationships: []
+      }
       email_events: {
         Row: {
           id: string
@@ -145,10 +162,27 @@ export interface Database {
           id: string
           email: string
           role: string
+          is_active: boolean
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['admin_users']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['admin_users']['Insert']>
+        Relationships: []
+      }
+      admin_2fa: {
+        Row: {
+          id: string
+          admin_user_id: string | null
+          admin_email: string
+          enabled: boolean
+          secret_encrypted: string
+          recovery_codes: Json
+          created_at: string
+          verified_at: string | null
+          last_used_at: string | null
+        }
+        Insert: Omit<Database['public']['Tables']['admin_2fa']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['admin_2fa']['Insert']>
         Relationships: []
       }
       audit_logs: {
@@ -165,9 +199,45 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['audit_logs']['Row']>
         Relationships: []
       }
+      inquiries: {
+        Row: {
+          id: string
+          type: string
+          name: string
+          email: string
+          phone: string | null
+          organization: string | null
+          role: string | null
+          subject: string | null
+          message: string
+          district: string | null
+          status: string
+          admin_notes: string | null
+          responded_at: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['inquiries']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['inquiries']['Insert']>
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      public_ideas_view: {
+        Row: {
+          id: string
+          public_id: string
+          title: string
+          description: string | null
+          district: string
+          status: string
+          category_id: string
+          created_at: string
+          category_name: string | null
+          category_slug: string | null
+          category_icon: string | null
+          category_color: string | null
+        }
+      }
     }
     Functions: {
       [_ in never]: never
@@ -188,6 +258,9 @@ export type User = Database['public']['Tables']['users']['Row']
 export type Idea = Database['public']['Tables']['ideas']['Row']
 export type IdeaGroup = Database['public']['Tables']['idea_groups']['Row']
 export type Vote = Database['public']['Tables']['votes']['Row']
+export type PublicVote = Database['public']['Tables']['public_votes']['Row']
 export type EmailEvent = Database['public']['Tables']['email_events']['Row']
 export type AdminUser = Database['public']['Tables']['admin_users']['Row']
+export type Admin2FA = Database['public']['Tables']['admin_2fa']['Row']
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row']
+export type Inquiry = Database['public']['Tables']['inquiries']['Row']

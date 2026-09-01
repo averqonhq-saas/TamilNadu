@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 import {
-  DEFAULT_CAMPAIGN,
-  DEFAULT_SHORTLISTED_IDEAS,
   ShortlistedIdea,
 } from "@/lib/constants/campaign";
 import { getCampaignState } from "@/lib/data/campaign";
@@ -11,7 +9,7 @@ import { getVotingCandidates } from "@/lib/data/voting";
 import { getPlatformSettings } from "@/lib/data/settings";
 import { createServiceClient } from "@/lib/supabase/server";
 
-const VOTING_SECRET = process.env.VOTING_SECRET_KEY || "build-tamil-nadu-vote-salt-2026";
+const VOTING_SECRET = process.env.VOTING_SECRET_KEY || "btn-production-vote-hmac-salt-2026-secure";
 
 function hashVoter(email: string): string {
   return crypto
@@ -53,12 +51,12 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Try fetching live aggregated votes from Supabase if configured and voting results are enabled
     let shortlisted = getVotingCandidates();
-    const isClosedOrResults = status === "CLOSED" || status === "RESULTS" || status === "WINNER";
+    const canExposeResults = allowResults || status === "CLOSED" || status === "RESULTS" || status === "WINNER";
 
-    try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    // Only query and aggregate vote distribution if allowed by campaign state or results phase
+    if (canExposeResults && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
         const supabase = createServiceClient();
         const { data: votesData } = await supabase.from("public_votes").select("idea_id");
 
@@ -78,16 +76,16 @@ export async function GET(req: NextRequest) {
             };
           });
         }
+      } catch {
+        // Fallback to default candidate list without counts
       }
-    } catch {
-      // Fallback to current candidates
     }
 
     return NextResponse.json({
       status,
       voting_start: votingStart,
       voting_end: votingEnd,
-      allow_results: allowResults,
+      allow_results: canExposeResults,
       shortlisted_ideas: shortlisted,
       user_voted: !!userVotedIdeaId,
       voted_idea_id: userVotedIdeaId,
@@ -107,14 +105,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { ideaId, email, otp, district } = body;
 
-    if (!ideaId) {
+    if (!ideaId || typeof ideaId !== "string") {
       return NextResponse.json(
         { error: "Please select an idea to vote for." },
         { status: 400 }
       );
     }
 
-    if (!email || !email.includes("@")) {
+    if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json(
         { error: "A valid email address is required to record your vote." },
         { status: 400 }
@@ -152,16 +150,18 @@ export async function POST(req: NextRequest) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
         const supabase = createServiceClient();
+
+        // 1. Check existing vote by voter_hash
         const { data: existingVote } = await supabase
           .from("public_votes")
           .select("id, idea_id, created_at")
           .eq("voter_hash", voterHash)
-          .single();
+          .maybeSingle();
 
         if (existingVote) {
           return NextResponse.json(
             {
-              error: "A vote has already been recorded from this email address.",
+              error: "A vote has already been recorded from this email address for this campaign.",
               already_voted: true,
               voted_idea_id: existingVote.idea_id,
             },
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Insert new vote
+        // 2. Insert new vote with DB unique constraint protection
         const { error: insertError } = await supabase.from("public_votes").insert({
           idea_id: candidate.id,
           voter_hash: voterHash,
@@ -178,15 +178,21 @@ export async function POST(req: NextRequest) {
         });
 
         if (insertError) {
-          if (insertError.code === "23505") {
+          if (insertError.code === "23505") { // Unique constraint violation
             return NextResponse.json(
-              { error: "A vote from this email is already recorded.", already_voted: true },
+              { error: "A vote from this email address is already recorded.", already_voted: true },
               { status: 409 }
             );
           }
           throw insertError;
         }
-      } catch (dbError) {
+      } catch (dbError: any) {
+        if (dbError?.code === "23505") {
+          return NextResponse.json(
+            { error: "A vote from this email address is already recorded.", already_voted: true },
+            { status: 409 }
+          );
+        }
         console.error("Database vote write failed:", dbError);
       }
     }

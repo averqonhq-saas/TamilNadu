@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buildtamilnadu.in";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tamil-nadu-five.vercel.app";
 
   return [
     {

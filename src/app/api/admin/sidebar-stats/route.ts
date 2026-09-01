@@ -4,8 +4,12 @@ import { TAMIL_NADU_DISTRICTS } from "@/lib/constants/districts";
 import { getCampaignState } from "@/lib/data/campaign";
 import { getStoredGroups, getStoredIdeas } from "@/lib/data/groups";
 import { getStoredInquiries } from "@/lib/data/inquiries";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const storedGroups = getStoredGroups();
     const storedIdeas = getStoredIdeas();

@@ -5,15 +5,18 @@ import {
   updateStoredGroup,
   deleteStoredGroup,
   getStoredIdeas,
-  GroupStatus,
   GroupMemberIdea,
 } from "@/lib/data/groups";
+import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
 
@@ -38,7 +41,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         created_at: i.created_at,
       }));
 
-    // If Supabase is connected, we can also check for DB data
     if (isSupabaseConfigured()) {
       try {
         const supabase = createServiceClient();
@@ -113,6 +115,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
     const body = await req.json();
@@ -131,6 +136,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         if (body.status !== undefined) updatePayload.status = body.status;
 
         await supabase.from("idea_groups").update(updatePayload).eq("id", id);
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "IDEA_GROUP_CHANGED",
+          entity_type: "IDEA_GROUP",
+          entity_id: id,
+          metadata: { updated_by: auth.admin.email, updates: updatePayload },
+        });
       } catch (dbErr) {
         console.warn("Supabase group update warning:", dbErr);
       }
@@ -148,6 +161,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
+  const auth = await verifyAdminSession(req, "ADMIN");
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await params;
 
@@ -161,6 +177,14 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
         const supabase = createServiceClient();
         await supabase.from("idea_group_members").delete().eq("group_id", id);
         await supabase.from("idea_groups").delete().eq("id", id);
+
+        await supabase.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: "IDEA_GROUP_DELETED",
+          entity_type: "IDEA_GROUP",
+          entity_id: id,
+          metadata: { deleted_by: auth.admin.email },
+        });
       } catch (dbErr) {
         console.warn("Supabase group delete warning:", dbErr);
       }

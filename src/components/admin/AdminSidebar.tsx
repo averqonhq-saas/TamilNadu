@@ -17,6 +17,7 @@ import {
   Rocket,
   Users,
   ShieldAlert,
+  ShieldCheck,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -94,7 +95,10 @@ export default function AdminSidebar({
       const res = await fetch("/api/admin/sidebar-stats");
       if (res.ok) {
         const data = await res.json();
-        setStats(data);
+        if (data && typeof data.ideasCount === "number") {
+          // Merge into prev so no existing field is ever wiped to undefined
+          setStats((prev) => ({ ...prev, ...data }));
+        }
       }
     } catch {
       // Keep existing stats
@@ -111,44 +115,47 @@ export default function AdminSidebar({
       href: "/admin/ideas",
       icon: Lightbulb,
       label: "Ideas",
-      badge: stats.ideasCount > 0 ? stats.ideasCount.toLocaleString() : undefined,
+      badge:
+        (Number(stats?.ideasCount) || 0) > 0
+          ? String(Number(stats?.ideasCount) || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          : undefined,
     },
     {
       href: "/admin/groups",
       icon: GitMerge,
       label: "Idea Groups",
-      badge: stats.groupsCount > 0 ? String(stats.groupsCount) : undefined,
+      badge: (Number(stats?.groupsCount) || 0) > 0 ? String(Number(stats?.groupsCount) || 0) : undefined,
     },
     {
       href: "/admin/shortlist",
       icon: Star,
       label: "Shortlist",
-      badge: stats.shortlistCount > 0 ? `${stats.shortlistCount} Finalists` : undefined,
+      badge: (Number(stats?.shortlistCount) || 0) > 0 ? `${Number(stats?.shortlistCount) || 0} Finalists` : undefined,
     },
     {
       href: "/admin/voting",
       icon: Vote,
       label: "Voting",
-      badge: stats.votingBadge,
+      badge: typeof stats?.votingBadge === "string" ? stats.votingBadge : undefined,
     },
     { href: "/admin/campaign", icon: Megaphone, label: "Campaign", badge: undefined },
     {
       href: "/admin/categories",
       icon: Tag,
       label: "Categories",
-      badge: stats.categoriesCount > 0 ? String(stats.categoriesCount) : undefined,
+      badge: (Number(stats?.categoriesCount) || 0) > 0 ? String(Number(stats?.categoriesCount) || 0) : undefined,
     },
     {
       href: "/admin/districts",
       icon: MapPin,
       label: "Districts",
-      badge: `${stats.activeDistrictsCount}/${stats.totalDistricts}`,
+      badge: `${Number(stats?.activeDistrictsCount) || 0}/${Number(stats?.totalDistricts) || 38}`,
     },
     {
       href: "/admin/communications",
       icon: Mail,
       label: "Communications",
-      badge: stats.inquiriesCount && stats.inquiriesCount > 0 ? `${stats.inquiriesCount} New` : undefined,
+      badge: (Number(stats?.inquiriesCount) || 0) > 0 ? `${Number(stats?.inquiriesCount)} New` : undefined,
     },
     { href: "/admin/analytics", icon: BarChart3, label: "Analytics", badge: undefined },
     { href: "/admin/product", icon: Rocket, label: "Product", badge: "Episode 3" },
@@ -156,10 +163,11 @@ export default function AdminSidebar({
       href: "/admin/admins",
       icon: Users,
       label: "Admin Access",
-      badge: stats.adminsCount > 0 ? String(stats.adminsCount) : undefined,
+      badge: (Number(stats?.adminsCount) || 0) > 0 ? String(Number(stats?.adminsCount) || 0) : undefined,
     },
     { href: "/admin/audit-logs", icon: ShieldAlert, label: "Audit Logs", badge: undefined },
     { href: "/admin/settings", icon: Settings, label: "Settings", badge: undefined },
+    { href: "/admin/settings/security", icon: ShieldCheck, label: "2FA Security", badge: "2FA" },
   ];
 
   const handleSignOut = async () => {
