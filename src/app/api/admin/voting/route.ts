@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { getCampaignState, updateCampaignState } from "@/lib/data/campaign";
+import { getCampaignStateAsync, updateCampaignStateAsync } from "@/lib/data/campaign";
 import {
   getVotingCandidates,
   addVotingCandidate,
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     }
 
     const currentCandidates = getVotingCandidates();
-    const campaign = getCampaignState();
+    const campaign = await getCampaignStateAsync();
 
     // Calculate counts per candidate
     const candidateStats = currentCandidates.map((idea) => {
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   // Authorize Admin Session (Requires ADMIN role or above)
-  const auth = await verifyAdminSession(req, "ADMIN");
+  const auth = await verifyAdminSession(req, "ADMIN", false);
   if (!auth.authorized) return auth.response;
 
   try {
@@ -103,32 +103,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Update campaign phase in memory
-    const updatedCampaign = updateCampaignState({
+    // Update campaign phase using async persistent updater
+    const updatedCampaign = await updateCampaignStateAsync({
       ...(status && { status }),
       ...(voting_start && { voting_start }),
       ...(voting_end && { voting_end }),
       ...(allow_results !== undefined && { allow_results_before_close: allow_results }),
     });
 
-    // Record audit log and persist to Supabase if connected
+    // Record audit log if Supabase is connected
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
         const service = createServiceClient();
-        await Promise.all([
-          service.from("campaigns").update({
-            ...(status && { status }),
-            ...(voting_start && { voting_start }),
-            ...(voting_end && { voting_end }),
-            ...(allow_results !== undefined && { allow_results_before_close: allow_results }),
-          }).neq("id", "00000000-0000-0000-0000-000000000000"),
-          service.from("audit_logs").insert({
-            admin_id: auth.admin.id || auth.admin.email,
-            action: `VOTING_CONFIG_${action || "UPDATE"}`,
-            entity_type: "CAMPAIGN_VOTING",
-            metadata: { status, voting_start, voting_end, allow_results, updated_by: auth.admin.email },
-          }),
-        ]);
+        await service.from("audit_logs").insert({
+          admin_id: auth.admin.id || auth.admin.email,
+          action: `VOTING_CONFIG_${action || "UPDATE"}`,
+          entity_type: "CAMPAIGN_VOTING",
+          metadata: { status, voting_start, voting_end, allow_results, updated_by: auth.admin.email },
+        });
       } catch (logErr) {
         console.error("Audit log error:", logErr);
       }

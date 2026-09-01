@@ -6,7 +6,7 @@
  * redundant client-side API calls for campaign status or settings.
  */
 
-import { getCampaignState } from "@/lib/data/campaign";
+import { getCampaignStateAsync } from "@/lib/data/campaign";
 import { getStoredSettings } from "@/lib/data/settings";
 import type { CampaignStatus } from "@/lib/constants/campaign";
 
@@ -18,8 +18,7 @@ export interface SiteConfig {
 }
 
 export async function getSiteConfig(): Promise<SiteConfig> {
-  // These are in-memory stores — fast, no DB call needed
-  const campaign = getCampaignState();
+  const campaign = await getCampaignStateAsync();
   const settings = getStoredSettings();
 
   return {

@@ -13,11 +13,13 @@ import { getSiteStats } from "@/lib/data/stats";
 import { getSiteConfig } from "@/lib/data/siteConfig";
 
 // Lazy-import heavy below-fold sections
-import dynamic from "next/dynamic";
-const VotingSection = dynamic(() => import("@/components/home/VotingSection"), {
+import nextDynamic from "next/dynamic";
+const VotingSection = nextDynamic(() => import("@/components/home/VotingSection"), {
   loading: () => <div className="h-[400px] bg-[#f8f7f4] animate-pulse" />,
   ssr: true,
 });
+
+export const dynamic = "force-dynamic";
 
 // Parallel server-side data fetching — single round-trip, no client-side calls
 async function getPageData() {

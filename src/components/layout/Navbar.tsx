@@ -15,10 +15,19 @@ interface NavbarProps {
 export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  // Use server-passed status as the default; no client-side fetch
-  const campaignStatus: CampaignStatus = initialStatus;
+  const [campaignStatus, setCampaignStatus] = useState<CampaignStatus>(initialStatus);
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+
+  useEffect(() => {
+    setCampaignStatus(initialStatus);
+    fetch("/api/campaign")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.status) setCampaignStatus(data.status as CampaignStatus);
+      })
+      .catch(() => {});
+  }, [initialStatus]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);

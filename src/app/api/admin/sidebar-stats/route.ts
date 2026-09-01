@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { TAMIL_NADU_DISTRICTS } from "@/lib/constants/districts";
-import { getCampaignState } from "@/lib/data/campaign";
+import { getCampaignStateAsync } from "@/lib/data/campaign";
 import { getStoredGroups, getStoredIdeas } from "@/lib/data/groups";
 import { getStoredInquiries } from "@/lib/data/inquiries";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const storedGroups = getStoredGroups();
     const storedIdeas = getStoredIdeas();
     const storedInquiries = getStoredInquiries();
-    const currentCampaign = getCampaignState();
+    const currentCampaign = await getCampaignStateAsync();
 
     let ideasCount = storedIdeas.length;
     let groupsCount = storedGroups.length;
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     const storedGroups = getStoredGroups();
     const storedIdeas = getStoredIdeas();
     const storedInquiries = getStoredInquiries();
-    const currentCampaign = getCampaignState();
+    const currentCampaign = await getCampaignStateAsync();
 
     return NextResponse.json({
       ideasCount: storedIdeas.length,

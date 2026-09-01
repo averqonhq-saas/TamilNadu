@@ -103,15 +103,21 @@ export default function AdminCampaignPage() {
         allow_results_before_close: allowEarlyResults,
       };
 
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const [res1, res2] = await Promise.all([
         fetch("/api/campaign", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(payload),
         }),
         fetch("/api/admin/voting", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ action: "UPDATE_STATUS", ...payload }),
         }),
       ]);

@@ -4,7 +4,7 @@ import crypto from "crypto";
 import {
   ShortlistedIdea,
 } from "@/lib/constants/campaign";
-import { getCampaignState } from "@/lib/data/campaign";
+import { getCampaignState, getCampaignStateAsync } from "@/lib/data/campaign";
 import { getVotingCandidates } from "@/lib/data/voting";
 import { getPlatformSettings } from "@/lib/data/settings";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const cookieStore = await cookies();
     const voteCookie = cookieStore.get("btn_voted_token");
 
-    const campaign = getCampaignState();
+    const campaign = await getCampaignStateAsync();
     const status = campaign.status;
     const votingEnd = campaign.voting_end;
     const votingStart = campaign.voting_start;

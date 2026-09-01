@@ -10,7 +10,7 @@
  */
 
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getCampaignState } from "@/lib/data/campaign";
+import { getCampaignStateAsync } from "@/lib/data/campaign";
 import { getStoredIdeas } from "@/lib/data/groups";
 import { getDaysRemaining } from "@/lib/utils";
 
@@ -31,7 +31,7 @@ const EXCLUDED_DISTRICTS = [
 ];
 
 export async function getSiteStats(): Promise<SiteStats> {
-  const currentCampaign = getCampaignState();
+  const currentCampaign = await getCampaignStateAsync();
 
   let totalIdeas = getStoredIdeas().length;
   let districtsRepresented = 38;

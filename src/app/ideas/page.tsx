@@ -5,6 +5,8 @@ import { Sparkles, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { getSiteConfig } from "@/lib/data/siteConfig";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Public Ideas Gallery — Build Tamil Nadu | Citizen Problem Registry",
   description:

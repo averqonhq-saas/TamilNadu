@@ -35,6 +35,11 @@ interface CategoryStat {
   percentage: number;
 }
 
+function formatNumber(value: unknown): string {
+  const number = typeof value === "number" && Number.isFinite(value) ? value : 0;
+  return String(number).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 async function getDashboardStats() {
   const fallbackIdeas = getStoredIdeas();
   const fallbackInquiries = getStoredInquiries();
@@ -124,7 +129,7 @@ async function getDashboardStats() {
         }));
       }
 
-      if (dbInquiries && dbInquiries.length > 0) {
+      if (dbInquiries) {
         stats.inquiries = dbInquiries;
         stats.newInquiriesCount = dbInquiries.filter((i: any) => i.status === "NEW").length;
         stats.partnerCount = dbInquiries.filter((i: any) => i.type === "PARTNER").length;
@@ -205,7 +210,7 @@ export default async function AdminDashboard() {
           </div>
           <div>
             <div className="font-jakarta font-extrabold text-[32px] text-[#0a0e1a]">
-              {stats.total.toLocaleString()}
+              {formatNumber(stats.total)}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-[#64748b] mt-1">
               <span className="text-[#10b981] font-bold">{stats.publicCount} Public</span>
@@ -266,7 +271,7 @@ export default async function AdminDashboard() {
           </div>
           <div>
             <div className="font-jakarta font-extrabold text-[32px] text-[#0a0e1a]">
-              {stats.totalVotes.toLocaleString()}
+              {formatNumber(stats.totalVotes)}
             </div>
             <div className="text-xs text-emerald-600 font-bold mt-1">
               1-Person-1-Vote Certified

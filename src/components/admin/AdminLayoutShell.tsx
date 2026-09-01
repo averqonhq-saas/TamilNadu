@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { subscribeToAdminAuth, signOutAdmin } from "@/lib/firebase/auth";
 import AdminSidebar, { SidebarStats } from "@/components/admin/AdminSidebar";
-import AdminControlRoomHeader from "@/components/admin/AdminControlRoomHeader";
+import AdminControlRoomHeader from "@/components/admin/AdminControlRoomHeaderSafe";
 import { AppIconBadge } from "@/components/brand/Logo";
 import { ShieldCheck, Loader2, Lock } from "lucide-react";
 

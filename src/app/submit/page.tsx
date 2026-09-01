@@ -4,6 +4,8 @@ import SubmitFlow from "@/components/submit/SubmitFlow";
 import type { Metadata } from "next";
 import { getSiteConfig } from "@/lib/data/siteConfig";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Share Your Idea — Build Tamil Nadu",
   description:
