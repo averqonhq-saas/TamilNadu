@@ -1,11 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { AdminIdeaUpdateSchema } from "@/lib/validations/idea";
-import { updateStoredIdea, getStoredIdeas } from "@/lib/data/groups";
+import { updateStoredIdea, getStoredIdeas, deleteStoredIdea } from "@/lib/data/groups";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
+}
+
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
+  // Authorize Admin Session (Requires REVIEWER role or above)
+  const auth = await verifyAdminSession(req, "REVIEWER");
+  if (!auth.authorized) return auth.response;
+
+  try {
+    const { id } = await params;
+
+    // Delete from in-memory / local shared store
+    deleteStoredIdea(id);
+
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({ success: true, message: "Deleted in local mode" });
+    }
+
+    const supabase = createServiceClient();
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    let deleteQuery = supabase.from("ideas").delete();
+
+    if (isUuid) {
+      deleteQuery = deleteQuery.eq("id", id);
+    } else {
+      deleteQuery = deleteQuery.or(`id.eq.${id},public_id.eq.${id}`);
+    }
+
+    const { error } = await deleteQuery;
+
+    if (error) {
+      throw error;
+    }
+
+    // Log audit action with authenticated admin ID/Email
+    try {
+      await supabase.from("audit_logs").insert({
+        admin_id: auth.admin.id || auth.admin.email,
+        action: "IDEA_DELETE",
+        entity_type: "idea",
+        entity_id: id,
+        metadata: {
+          deleter: auth.admin.email,
+          role: auth.admin.role,
+        },
+      });
+    } catch (auditErr) {
+      console.warn("Non-critical audit log insert error on delete:", auditErr);
+    }
+
+    return NextResponse.json({ success: true, message: "Idea deleted successfully" });
+  } catch (error) {
+    console.error("Admin idea delete error:", error);
+    return NextResponse.json({ message: "Failed to delete idea" }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {

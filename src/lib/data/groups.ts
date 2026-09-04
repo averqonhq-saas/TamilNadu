@@ -746,6 +746,22 @@ export function updateStoredIdea(id: string, updates: Partial<GroupableIdea>): G
   return ideasStore[idx];
 }
 
+export function deleteStoredIdea(id: string): boolean {
+  const initialLength = ideasStore.length;
+  ideasStore = ideasStore.filter((i) => i.id !== id && i.public_id !== id);
+
+  // Remove from any groups that contain it
+  groupsStore.forEach((grp) => {
+    if (grp.member_idea_ids.includes(id)) {
+      grp.member_idea_ids = grp.member_idea_ids.filter((memberId) => memberId !== id);
+      syncGroupCounts(grp);
+      grp.updated_at = new Date().toISOString();
+    }
+  });
+
+  return ideasStore.length < initialLength;
+}
+
 export function addStoredIdea(payload: Partial<GroupableIdea>): GroupableIdea {
   const newId = payload.id || `idea-${Date.now()}`;
   const publicId = payload.public_id || `TN-2026-${Math.floor(10000 + Math.random() * 90000)}`;

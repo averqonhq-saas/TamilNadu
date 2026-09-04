@@ -66,6 +66,30 @@ export default function AdminIdeasTable({
     }
   };
 
+  const deleteIdea = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete idea "${title}"? This action cannot be undone.`)) {
+      return;
+    }
+    setLoadingId(id);
+    try {
+      const res = await fetch(`/api/admin/ideas/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Delete failed");
+      }
+
+      toast.success("Idea deleted successfully");
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete idea");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   if (ideas.length === 0) {
     return (
       <div className="bg-white border border-[#e2e8f0] rounded-xl p-12 text-center">
@@ -186,6 +210,16 @@ export default function AdminIdeasTable({
                             <X size={14} />
                           </button>
                         )}
+
+                        {/* Delete */}
+                        <button
+                          onClick={() => deleteIdea(idea.id, idea.title)}
+                          disabled={isLoading}
+                          className="btn btn-icon btn-ghost text-[#ef4444] hover:text-[#dc2626] hover:bg-rose-50"
+                          title="Delete idea"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>

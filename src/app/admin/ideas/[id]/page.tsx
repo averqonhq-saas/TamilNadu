@@ -129,6 +129,32 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteIdea = async () => {
+    if (!idea) return;
+    if (!window.confirm(`Are you sure you want to permanently delete idea "${idea.title}"? This cannot be undone.`)) {
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/ideas/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Delete failed");
+      }
+
+      toast.success("Idea permanently deleted");
+      router.push("/admin/ideas");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete idea");
+      setIsDeleting(false);
+    }
+  };
+
   const copyEmail = () => {
     if (idea?.submitter_email) {
       navigator.clipboard.writeText(idea.submitter_email);
@@ -402,6 +428,17 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
                 {idea.status === "REJECTED" && <span className="text-[10px] font-mono">ACTIVE</span>}
               </button>
+
+              <div className="pt-2 border-t border-[#e2e8f0]">
+                <button
+                  onClick={handleDeleteIdea}
+                  disabled={isDeleting}
+                  className="w-full p-3 rounded-xl border border-rose-200 bg-rose-50/60 hover:bg-rose-100/80 text-rose-700 text-xs font-bold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Trash2 size={15} className="text-rose-600" />
+                  <span>{isDeleting ? "Deleting..." : "Delete Submission"}</span>
+                </button>
+              </div>
             </div>
           </div>
 
