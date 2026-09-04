@@ -16,7 +16,7 @@ const NEXT_STEPS = [
 
 export default function SuccessScreen({ ideaId }: { ideaId: string }) {
   const [copied, setCopied] = useState(false);
-  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://tamil-nadu-five.vercel.app";
+  const siteUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://tnbuild.wedigistudio.com";
   const shareUrl = siteUrl;
 
   const copyLink = async () => {

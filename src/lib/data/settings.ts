@@ -10,7 +10,7 @@ export interface PlatformSettings {
 
 let settingsStore: PlatformSettings = {
   siteName: "Build Tamil Nadu",
-  supportEmail: "vanakkam@buildtamilnadu.in",
+  supportEmail: "swayam@wedigistudio.com",
   enableVoiceInput: true,
   requireEmailOtp: false, // seamless 1-click instant verification by default, toggleable to OTP
   rateLimitPerIp: 10,

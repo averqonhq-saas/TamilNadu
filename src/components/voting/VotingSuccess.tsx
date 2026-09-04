@@ -51,11 +51,15 @@ export default function VotingSuccess({
   const productName = votedIdea.product_name || votedIdea.title;
   const productEmoji = votedIdea.emoji || "🚀";
 
-  const shareText = `Tamil Nadu is choosing the first product we should build! I chose "${productName}" ${productEmoji}. What would you choose? Cast your vote here: ${SITE_URL}/vote`;
+  const effectiveSiteUrl = typeof window !== "undefined" && window.location.origin
+    ? window.location.origin
+    : SITE_URL;
+
+  const shareText = `Tamil Nadu is choosing the first product we should build! I chose "${productName}" ${productEmoji}. What would you choose? Cast your vote here: ${effectiveSiteUrl}/vote`;
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`${SITE_URL}/vote`);
+      await navigator.clipboard.writeText(`${effectiveSiteUrl}/vote`);
       setCopied(true);
       toast.success("Voting link copied to clipboard!");
       setTimeout(() => setCopied(false), 2500);

@@ -42,8 +42,8 @@ export default function TermsPage() {
               </p>
               <p>
                 For questions, contact us at{" "}
-                <a href="mailto:hello@buildtamilnadu.in" className="text-[#e85d26] hover:underline">
-                  hello@buildtamilnadu.in
+                <a href="mailto:swayam@wedigistudio.com" className="text-[#e85d26] hover:underline">
+                  swayam@wedigistudio.com
                 </a>
                 .
               </p>

@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     "build for Tamil Nadu",
   ],
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://tamil-nadu-five.vercel.app"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://tnbuild.wedigistudio.com"
   ),
   openGraph: {
     title: "Build Tamil Nadu — What Should We Build for Tamil Nadu?",
     description:
       "A citizen-driven technology initiative. Tell us the problem. Tamil Nadu decides what we build.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://tamil-nadu-five.vercel.app",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://tnbuild.wedigistudio.com",
     siteName: "Build Tamil Nadu",
     images: [
       {
@@ -79,7 +79,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${plusJakarta.variable}`} data-scroll-behavior="smooth">
-      <body className="font-inter antialiased bg-surface text-navy">
+      <body className="font-inter antialiased bg-surface text-navy" suppressHydrationWarning>
         {children}
         <Toaster
           position="top-center"

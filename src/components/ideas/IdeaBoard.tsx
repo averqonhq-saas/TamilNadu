@@ -73,11 +73,11 @@ export default function IdeaBoard() {
   return (
     <div>
       {/* Category Horizontal Quick Chips */}
-      <div className="mb-6 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-5" >
+      <div className="mb-6 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-6">
         <div className="flex items-center gap-2 w-max">
           <button
             onClick={() => { setSelectedCategory(""); setPage(1); }}
-            className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap ${
+            className={`px-4 py-2 rounded-xl text-[15px] font-bold transition-all whitespace-nowrap ${
               selectedCategory === ""
                 ? "bg-[#0a0e1a] text-white shadow-md"
                 : "bg-white text-[#64748b] hover:bg-[#f1f5f9] border border-[#e2e8f0]"

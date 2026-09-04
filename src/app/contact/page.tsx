@@ -67,11 +67,11 @@ export default function ContactPage() {
                         General &amp; Citizen Inquiries
                       </span>
                       <a
-                        href="mailto:vanakkam@buildtamilnadu.in"
+                        href="mailto:swayam@wedigistudio.com"
                         className="font-bold text-[#e85d26] hover:underline flex items-center gap-2 text-[15px]"
                       >
                         <Mail size={16} />
-                        <span>vanakkam@buildtamilnadu.in</span>
+                        <span>swayam@wedigistudio.com</span>
                       </a>
                     </div>
 

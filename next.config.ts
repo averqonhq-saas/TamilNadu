@@ -22,16 +22,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Immutable cache for hashed Next.js static assets
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
       // Public API: campaign status (30s fresh, 2min stale-while-revalidate)
       {
         source: "/api/campaign",

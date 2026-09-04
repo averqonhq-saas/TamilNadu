@@ -15,17 +15,17 @@ import {
 import { ShortlistedIdea } from "@/lib/constants/campaign";
 import { toast } from "sonner";
 
-interface VotingPollProps {
+interface VotingBallotProps {
   shortlistedIdeas: ShortlistedIdea[];
   votingEnd: string | Date | null;
   onVoteSuccess: (votedData: { idea: ShortlistedIdea; emailMasked: string }) => void;
 }
 
-export default function VotingPoll({
+export default function VotingBallot({
   shortlistedIdeas,
   votingEnd,
   onVoteSuccess,
-}: VotingPollProps) {
+}: VotingBallotProps) {
   const [selectedId, setSelectedId] = useState<string>("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [email, setEmail] = useState("");

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import VotingPoll from "@/components/voting/VotingPoll";
+import VotingBallot from "@/components/voting/VotingBallot";
 import VotingSuccess from "@/components/voting/VotingSuccess";
 import VotingResults from "@/components/voting/VotingResults";
 import VotingNotStarted from "@/components/voting/VotingNotStarted";
@@ -89,7 +89,7 @@ function VotePageContent() {
         ) : status === "RESULTS" || status === "WINNER" ? (
           <VotingResults ideas={shortlisted} />
         ) : status === "VOTING" ? (
-          <VotingPoll
+          <VotingBallot
             shortlistedIdeas={shortlisted}
             votingEnd={votingEnd}
             onVoteSuccess={handleVoteSuccess}

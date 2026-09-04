@@ -24,7 +24,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
   return {
     campaignStatus: campaign.status as CampaignStatus,
     siteName: settings.siteName ?? "Build Tamil Nadu",
-    supportEmail: settings.supportEmail ?? "vanakkam@buildtamilnadu.in",
+    supportEmail: settings.supportEmail ?? "swayam@wedigistudio.com",
     enableVoiceInput: settings.enableVoiceInput ?? true,
   };
 }

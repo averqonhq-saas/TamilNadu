@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CATEGORIES } from "@/lib/constants/categories";
-import { Check, Edit3, HelpCircle } from "lucide-react";
+import { Check, Edit3 } from "lucide-react";
 
 interface StepProblemProps {
   categoryId: string;

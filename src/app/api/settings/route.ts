@@ -15,7 +15,7 @@ export async function GET() {
     console.error("Public settings GET error:", error);
     return NextResponse.json({
       siteName: "Build Tamil Nadu",
-      supportEmail: "vanakkam@buildtamilnadu.in",
+      supportEmail: "swayam@wedigistudio.com",
       enableVoiceInput: true,
       requireEmailOtp: false,
       maintenanceMode: false,

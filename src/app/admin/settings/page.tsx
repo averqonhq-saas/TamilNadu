@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 export default function AdminSettingsPage() {
   const [siteName, setSiteName] = useState("Build Tamil Nadu");
-  const [supportEmail, setSupportEmail] = useState("vanakkam@buildtamilnadu.in");
+  const [supportEmail, setSupportEmail] = useState("swayam@wedigistudio.com");
   const [enableVoiceInput, setEnableVoiceInput] = useState(true);
   const [requireEmailOtp, setRequireEmailOtp] = useState(false);
   const [rateLimitPerIp, setRateLimitPerIp] = useState(10);

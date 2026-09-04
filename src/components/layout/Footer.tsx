@@ -30,7 +30,7 @@ function getStatusBadge(campaignStatus: string) {
 
 export default function Footer({
   siteName = "Build Tamil Nadu",
-  supportEmail = "vanakkam@buildtamilnadu.in",
+  supportEmail = "swayam@wedigistudio.com",
   campaignStatus = "COLLECTING",
 }: FooterProps) {
   const badge = getStatusBadge(campaignStatus);
