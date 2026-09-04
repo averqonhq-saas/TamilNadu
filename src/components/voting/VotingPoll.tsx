@@ -382,7 +382,7 @@ export default function VotingPoll({
           </div>
 
           <Link
-            href="/how-it-works"
+            href="/about"
             className="btn btn-secondary flex items-center gap-2 whitespace-nowrap font-bold text-sm h-11 px-5 rounded-xl"
           >
             <span>Explore The 7-Step Process</span>

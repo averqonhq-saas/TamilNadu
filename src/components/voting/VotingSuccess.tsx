@@ -217,7 +217,7 @@ export default function VotingSuccess({
             </button>
 
             <Link
-              href="/how-it-works"
+              href="/about"
               className="btn btn-primary flex items-center justify-center gap-2 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-[#e85d26]/20 w-full sm:w-auto text-xs"
             >
               <span>Follow Build Journey</span>

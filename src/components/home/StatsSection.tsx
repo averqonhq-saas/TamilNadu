@@ -36,7 +36,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
       value: stats.categoriesActive.toString(),
       label: "Core Themes",
       sublabel: "healthcare, transit & more",
-      href: "/how-it-works",
+      href: "/ideas",
     },
     {
       icon: <Clock size={22} className="text-[#f59e0b]" />,
@@ -44,7 +44,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
       value: stats.daysRemaining !== null ? `${stats.daysRemaining}d` : "Phase 1",
       label: "Collection Period",
       sublabel: "before public voting",
-      href: "/how-it-works",
+      href: "/ideas",
     },
   ];
 

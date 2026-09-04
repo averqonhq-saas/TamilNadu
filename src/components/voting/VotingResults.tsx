@@ -115,7 +115,7 @@ export default function VotingResults({ ideas }: VotingResultsProps) {
 
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <Link
-                  href="/how-it-works"
+                  href="/about"
                   className="btn btn-primary btn-lg flex items-center gap-2 font-bold px-7 h-12 rounded-2xl shadow-lg shadow-[#e85d26]/30"
                 >
                   <span>Track the Open Build</span>

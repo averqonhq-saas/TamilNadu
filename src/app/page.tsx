@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/home/HeroSection";
@@ -11,13 +10,6 @@ import GovernmentSection from "@/components/home/GovernmentSection";
 import FinalSection from "@/components/home/FinalSection";
 import { getSiteStats } from "@/lib/data/stats";
 import { getSiteConfig } from "@/lib/data/siteConfig";
-
-// Lazy-import heavy below-fold sections
-import nextDynamic from "next/dynamic";
-const VotingSection = nextDynamic(() => import("@/components/home/VotingSection"), {
-  loading: () => <div className="h-[400px] bg-[#f8f7f4] animate-pulse" />,
-  ssr: true,
-});
 
 export const dynamic = "force-dynamic";
 
@@ -47,10 +39,6 @@ export default async function Home() {
         <StatsSection stats={stats} />
 
         {/* ---- BELOW THE FOLD: loaded after hero paint ---- */}
-        <Suspense fallback={<div className="h-[400px]" />}>
-          <VotingSection status={campaignStatus} id="voting" />
-        </Suspense>
-
         <HowItWorksSection />
         <CategoriesSection />
         <ExamplesSection />

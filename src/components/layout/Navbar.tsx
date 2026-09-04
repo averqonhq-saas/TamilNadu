@@ -141,9 +141,6 @@ export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }:
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-1">
-              <NavLink href="/how-it-works" isDark={useDarkNav}>
-                How It Works
-              </NavLink>
               <NavLink href="/ideas" isDark={useDarkNav}>
                 Browse Ideas
               </NavLink>
@@ -247,9 +244,6 @@ export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }:
 
           {/* Mobile Links */}
           <nav className="flex-1 p-5 space-y-2">
-            <MobileNavLink href="/how-it-works" onClick={() => setIsMobileOpen(false)}>
-              How It Works
-            </MobileNavLink>
             <MobileNavLink href="/ideas" onClick={() => setIsMobileOpen(false)}>
               Browse Ideas
             </MobileNavLink>
