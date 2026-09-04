@@ -24,20 +24,34 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     }
 
     const supabase = createServiceClient();
-
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-    let deleteQuery = supabase.from("ideas").delete();
 
-    if (isUuid) {
-      deleteQuery = deleteQuery.eq("id", id);
-    } else {
-      deleteQuery = deleteQuery.or(`id.eq.${id},public_id.eq.${id}`);
+    let targetUuid = isUuid ? id : null;
+    if (!targetUuid) {
+      const { data: record } = await supabase
+        .from("ideas")
+        .select("id")
+        .eq("public_id", id)
+        .maybeSingle();
+      if (record?.id) {
+        targetUuid = record.id;
+      }
     }
 
-    const { error } = await deleteQuery;
+    if (targetUuid) {
+      // Clean up child tables to avoid FK constraint blocks
+      try {
+        await supabase.from("idea_group_members").delete().eq("idea_id", targetUuid);
+        await supabase.from("votes").delete().eq("idea_id", targetUuid);
+      } catch (relErr) {
+        console.warn("Non-fatal relation cleanup error:", relErr);
+      }
 
-    if (error) {
-      throw error;
+      const { error } = await supabase.from("ideas").delete().eq("id", targetUuid);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from("ideas").delete().eq("public_id", id);
+      if (error) throw error;
     }
 
     // Log audit action with authenticated admin ID/Email
@@ -57,9 +71,12 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json({ success: true, message: "Idea deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Admin idea delete error:", error);
-    return NextResponse.json({ message: "Failed to delete idea" }, { status: 500 });
+    return NextResponse.json(
+      { message: error?.message || "Failed to delete idea from database" },
+      { status: 500 }
+    );
   }
 }
 
@@ -180,7 +197,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     if (isUuid) {
       query = query.eq("id", id);
     } else {
-      query = query.or(`id.eq.${id},public_id.eq.${id}`);
+      query = query.eq("public_id", id);
     }
 
     const { data: idea, error } = await query.single();

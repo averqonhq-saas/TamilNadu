@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { formatRelativeDate } from "@/lib/utils";
 import { Eye, Check, X, Star, Trash2, Globe } from "lucide-react";
@@ -41,7 +41,13 @@ export default function AdminIdeasTable({
   page: number;
   limit: number;
 }) {
+  const [currentIdeas, setCurrentIdeas] = useState<Idea[]>(ideas);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  // Sync prop changes
+  useEffect(() => {
+    setCurrentIdeas(ideas);
+  }, [ideas]);
 
   const updateIdea = async (
     id: string,
@@ -55,22 +61,29 @@ export default function AdminIdeasTable({
         body: JSON.stringify(updates),
       });
 
-      if (!res.ok) throw new Error("Update failed");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || "Update failed");
+      }
 
       toast.success("Idea updated successfully");
       window.location.reload();
-    } catch {
-      toast.error("Failed to update idea");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update idea");
     } finally {
       setLoadingId(null);
     }
   };
 
   const deleteIdea = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete idea "${title}"? This action cannot be undone.`)) {
+    if (!window.confirm(`Are you sure you want to permanently delete idea "${title}"? This cannot be undone.`)) {
       return;
     }
     setLoadingId(id);
+    const previousIdeas = currentIdeas;
+    // Optimistic removal
+    setCurrentIdeas((prev) => prev.filter((i) => i.id !== id && i.public_id !== id));
+
     try {
       const res = await fetch(`/api/admin/ideas/${id}`, {
         method: "DELETE",
@@ -78,19 +91,20 @@ export default function AdminIdeasTable({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Delete failed");
+        throw new Error(data.error || data.message || "Delete failed");
       }
 
       toast.success("Idea deleted successfully");
-      window.location.reload();
     } catch (err: any) {
+      // Revert optimistic removal on failure
+      setCurrentIdeas(previousIdeas);
       toast.error(err?.message || "Failed to delete idea");
     } finally {
       setLoadingId(null);
     }
   };
 
-  if (ideas.length === 0) {
+  if (currentIdeas.length === 0) {
     return (
       <div className="bg-white border border-[#e2e8f0] rounded-xl p-12 text-center">
         <p className="text-[#64748b]">No ideas found.</p>
@@ -116,7 +130,7 @@ export default function AdminIdeasTable({
               </tr>
             </thead>
             <tbody>
-              {ideas.map((idea) => {
+              {currentIdeas.map((idea) => {
                 const isLoading = loadingId === idea.id;
                 const statusColor = STATUS_COLORS[idea.status] || "#64748b";
 
@@ -178,6 +192,7 @@ export default function AdminIdeasTable({
                         {/* Make public */}
                         {idea.visibility !== "PUBLIC" && (
                           <button
+                            type="button"
                             onClick={() => updateIdea(idea.id, { status: "PUBLIC", visibility: "PUBLIC" })}
                             disabled={isLoading}
                             className="btn btn-icon btn-ghost text-[#22c55e] hover:text-[#16a34a]"
@@ -190,6 +205,7 @@ export default function AdminIdeasTable({
                         {/* Shortlist */}
                         {idea.status !== "SHORTLISTED" && (
                           <button
+                            type="button"
                             onClick={() => updateIdea(idea.id, { status: "SHORTLISTED" })}
                             disabled={isLoading}
                             className="btn btn-icon btn-ghost text-[#8b5cf6] hover:text-[#7c3aed]"
@@ -202,6 +218,7 @@ export default function AdminIdeasTable({
                         {/* Reject */}
                         {idea.status !== "REJECTED" && (
                           <button
+                            type="button"
                             onClick={() => updateIdea(idea.id, { status: "REJECTED" })}
                             disabled={isLoading}
                             className="btn btn-icon btn-ghost text-[#ef4444] hover:text-[#dc2626]"
@@ -213,10 +230,11 @@ export default function AdminIdeasTable({
 
                         {/* Delete */}
                         <button
+                          type="button"
                           onClick={() => deleteIdea(idea.id, idea.title)}
                           disabled={isLoading}
-                          className="btn btn-icon btn-ghost text-[#ef4444] hover:text-[#dc2626] hover:bg-rose-50"
-                          title="Delete idea"
+                          className="btn btn-icon btn-ghost text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                          title="Delete Idea"
                         >
                           <Trash2 size={14} />
                         </button>
