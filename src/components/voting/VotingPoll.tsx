@@ -39,11 +39,7 @@ export default function VotingPoll({
   const [selectedId, setSelectedId] = useState<string>("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [maskedEmail, setMaskedEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRequestingOtp, setIsRequestingOtp] = useState(false);
 
   const selectedIdea = useMemo(
     () => shortlistedIdeas.find((i) => i.id === selectedId || i.public_id === selectedId),
@@ -81,42 +77,12 @@ export default function VotingPoll({
     return () => clearInterval(interval);
   }, [votingEnd]);
 
-  // Request OTP
-  const handleRequestOtp = async (e?: React.FormEvent) => {
+  // Submit Vote directly without OTP
+  const handleFinalVote = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address to verify your vote.");
-      return;
-    }
-
-    setIsRequestingOtp(true);
-    try {
-      const res = await fetch("/api/vote/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send verification code");
-
-      setOtpSent(true);
-      setMaskedEmail(data.masked_email || email);
-      if (data.debug_code) {
-        setOtp(data.debug_code); // auto-fill for frictionless verification in testing
-      }
-      toast.success("Verification code dispatched to your email!");
-    } catch (err: any) {
-      toast.error(err.message || "Could not send verification code.");
-    } finally {
-      setIsRequestingOtp(false);
-    }
-  };
-
-  // Submit Final Vote
-  const handleFinalVote = async () => {
     if (!selectedIdea) return;
-    if (!email) {
-      toast.error("Please enter your email to confirm your vote.");
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address to confirm your vote.");
       return;
     }
 
@@ -127,8 +93,7 @@ export default function VotingPoll({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ideaId: selectedIdea.id,
-          email,
-          otp,
+          email: email.trim().toLowerCase(),
           district: selectedIdea.district,
         }),
       });
@@ -475,18 +440,8 @@ export default function VotingPoll({
               </div>
             </div>
 
-            {/* Verification Form */}
-            <form
-              onSubmit={
-                otpSent
-                  ? (e) => {
-                      e.preventDefault();
-                      handleFinalVote();
-                    }
-                  : handleRequestOtp
-              }
-              className="space-y-4 mb-5"
-            >
+            {/* Vote Form */}
+            <form onSubmit={handleFinalVote} className="space-y-4 mb-5">
               <div>
                 <label htmlFor="voter-email" className="block text-[13.5px] font-bold text-[#0a0e1a] mb-1.5">
                   Enter your email address to record your choice:
@@ -497,7 +452,7 @@ export default function VotingPoll({
                     id="voter-email"
                     type="email"
                     required
-                    disabled={otpSent || isSubmitting}
+                    disabled={isSubmitting}
                     className="input pl-10 h-11 text-[14px]"
                     placeholder="you@example.com"
                     value={email}
@@ -509,66 +464,28 @@ export default function VotingPoll({
                 </p>
               </div>
 
-              {otpSent && (
-                <div className="animate-fade-in bg-[#f0fdf4] p-4 rounded-2xl border border-[#bbf7d0]">
-                  <label htmlFor="voter-otp" className="block text-[13px] font-bold text-[#166534] mb-1.5">
-                    Enter the 6-digit verification code sent to {maskedEmail}:
-                  </label>
-                  <input
-                    id="voter-otp"
-                    type="text"
-                    required
-                    maxLength={6}
-                    autoFocus
-                    className="input h-11 text-center font-mono font-bold tracking-widest text-[16px] bg-white"
-                    placeholder="123456"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                  />
-                </div>
-              )}
-            </form>
+              {/* Irreversible Notice */}
+              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-[#fffbeb] border border-[#fde68a] text-[12.5px] text-[#92400e]">
+                <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-[#d97706]" />
+                <span>
+                  <strong>Notice:</strong> Once submitted, your vote can&apos;t be changed.
+                </span>
+              </div>
 
-            {/* Irreversible Notice */}
-            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-[#fffbeb] border border-[#fde68a] text-[12.5px] text-[#92400e] mb-6">
-              <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-[#d97706]" />
-              <span>
-                <strong>Notice:</strong> Once submitted, your vote can&apos;t be changed.
-              </span>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                type="button"
-                onClick={() => setIsConfirmOpen(false)}
-                disabled={isSubmitting}
-                className="btn btn-secondary flex-1 justify-center h-12 rounded-2xl font-bold"
-              >
-                Go Back
-              </button>
-
-              {!otpSent ? (
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={handleRequestOtp}
-                  disabled={!email || isRequestingOtp}
-                  className="btn btn-primary flex-1 justify-center h-12 rounded-2xl font-bold shadow-md shadow-[#e85d26]/20 disabled:opacity-40"
-                >
-                  {isRequestingOtp ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>Verifying...</span>
-                    </>
-                  ) : (
-                    <span>Confirm My Vote</span>
-                  )}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleFinalVote}
+                  onClick={() => setIsConfirmOpen(false)}
                   disabled={isSubmitting}
+                  className="btn btn-secondary flex-1 justify-center h-12 rounded-2xl font-bold"
+                >
+                  Go Back
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={!email || isSubmitting}
                   className="btn btn-primary flex-1 justify-center h-12 rounded-2xl font-bold shadow-md shadow-[#e85d26]/20 disabled:opacity-40"
                 >
                   {isSubmitting ? (
@@ -580,8 +497,8 @@ export default function VotingPoll({
                     <span>Confirm My Vote 🇮🇳</span>
                   )}
                 </button>
-              )}
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       )}
