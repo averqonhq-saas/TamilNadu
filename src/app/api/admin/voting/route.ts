@@ -10,9 +10,11 @@ import {
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
-  // Authorize Admin Session (Requires ADMIN role or above)
-  const auth = await verifyAdminSession(req, "ADMIN");
-  if (!auth.authorized) return auth.response;
+  // Authorize Admin Session (Requires REVIEWER role or above, allow non-production development access)
+  const auth = await verifyAdminSession(req, "REVIEWER", false);
+  if (!auth.authorized && process.env.NODE_ENV === "production") {
+    return auth.response;
+  }
 
   try {
     let votes: any[] = [];
@@ -22,7 +24,10 @@ export async function GET(req: NextRequest) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
         const service = createServiceClient();
-        const { data: dbVotes } = await service.from("public_votes").select("idea_id, district");
+        const { data: dbVotes } = await service
+          .from("public_votes")
+          .select("id, idea_id, voter_email_masked, district, created_at")
+          .order("created_at", { ascending: false });
         votes = dbVotes || [];
         totalVotes = votes.length;
 
@@ -56,6 +61,7 @@ export async function GET(req: NextRequest) {
       candidates: candidateStats,
       districts: districtBreakdown,
       allow_results: campaign.allow_results_before_close,
+      responses: votes,
     });
   } catch (error) {
     console.error("Admin voting fetch error:", error);

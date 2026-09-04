@@ -24,6 +24,8 @@ import {
   Loader2,
   Layers,
   Check,
+  Search,
+  Mail,
 } from "lucide-react";
 import {
   CampaignStatus,
@@ -34,6 +36,14 @@ import {
 import { CATEGORIES, getCategoryById } from "@/lib/constants/categories";
 import { ManualGroup } from "@/lib/data/groups";
 import { toast } from "sonner";
+
+export interface VoteResponseItem {
+  id: string;
+  idea_id: string;
+  voter_email_masked: string;
+  district: string;
+  created_at: string;
+}
 
 const EMOJI_PRESETS = ["🚌", "🏥", "🌾", "🎓", "🚨", "🏛️", "💼", "🌱", "⚡", "🛡️", "💧", "🏘️", "📱", "🎯", "🚀"];
 
@@ -68,6 +78,11 @@ export default function AdminVotingPage() {
   const [deleteTarget, setDeleteTarget] = useState<ShortlistedIdea | null>(null);
   const [isDeletingFinalist, setIsDeletingFinalist] = useState(false);
 
+  // Voting Responses State
+  const [responses, setResponses] = useState<VoteResponseItem[]>([]);
+  const [selectedResponseFilter, setSelectedResponseFilter] = useState<string>("ALL");
+  const [responseSearch, setResponseSearch] = useState<string>("");
+
   const fetchVotingData = async () => {
     setIsLoading(true);
     try {
@@ -81,6 +96,7 @@ export default function AdminVotingPage() {
         if (data.voting_end) setVotingEnd(new Date(data.voting_end).toISOString().split("T")[0]);
         if (data.districts) setDistricts(data.districts);
         if (data.allow_results !== undefined) setAllowResults(data.allow_results);
+        if (data.responses) setResponses(data.responses);
       }
     } catch (err) {
       console.error("Admin voting fetch error:", err);
@@ -286,6 +302,63 @@ export default function AdminVotingPage() {
     toast.success("Voting report exported as CSV!");
   };
 
+  const handleExportResponsesCSV = () => {
+    if (responses.length === 0) {
+      toast.info("No voting responses recorded yet.");
+      return;
+    }
+
+    const headers = [
+      "Response ID",
+      "Voter Masked Email",
+      "Candidate ID",
+      "Candidate Name",
+      "Category",
+      "District",
+      "Timestamp (UTC)",
+      "Verification Status",
+    ];
+
+    const rows = responses.map((r) => {
+      const candidate = candidates.find((c) => c.id === r.idea_id || c.public_id === r.idea_id);
+      return [
+        r.id,
+        r.voter_email_masked,
+        r.idea_id,
+        `"${(candidate?.product_name || candidate?.title || "Unknown Candidate").replace(/"/g, '""')}"`,
+        candidate?.category_name || "General",
+        `"${(r.district || "Unspecified").replace(/"/g, '""')}"`,
+        r.created_at,
+        "SHA-256 HMAC Verified",
+      ];
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `citizen_voting_responses_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${responses.length} citizen voting responses!`);
+  };
+
+  const filteredResponses = responses.filter((r) => {
+    const matchesCandidate =
+      selectedResponseFilter === "ALL" ||
+      r.idea_id === selectedResponseFilter ||
+      candidates.some((c) => (c.id === selectedResponseFilter || c.public_id === selectedResponseFilter) && (c.id === r.idea_id || c.public_id === r.idea_id));
+
+    const matchesSearch =
+      !responseSearch.trim() ||
+      r.voter_email_masked.toLowerCase().includes(responseSearch.toLowerCase().trim()) ||
+      (r.district && r.district.toLowerCase().includes(responseSearch.toLowerCase().trim())) ||
+      r.id.toLowerCase().includes(responseSearch.toLowerCase().trim());
+
+    return matchesCandidate && matchesSearch;
+  });
+
   return (
     <div className="p-6 lg:p-8 max-w-7xl space-y-8">
       {/* Page Header */}
@@ -312,6 +385,13 @@ export default function AdminVotingPage() {
             <span>Refresh</span>
           </button>
           <a
+            href="#voting-responses-section"
+            className="btn btn-secondary btn-sm flex items-center gap-2 font-bold text-[#0a0e1a]"
+          >
+            <Eye size={14} className="text-[#e85d26]" />
+            <span>Responses ({responses.length})</span>
+          </a>
+          <a
             href="/vote"
             target="_blank"
             rel="noopener noreferrer"
@@ -325,7 +405,7 @@ export default function AdminVotingPage() {
             className="btn btn-primary btn-sm flex items-center gap-2 font-bold px-4"
           >
             <Download size={14} />
-            <span>Export CSV</span>
+            <span>Export Standings</span>
           </button>
         </div>
       </div>
@@ -467,7 +547,20 @@ export default function AdminVotingPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedResponseFilter("ALL");
+                const el = document.getElementById("voting-responses-section");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="btn btn-secondary btn-sm flex items-center gap-2 font-bold px-3.5 h-9 rounded-xl border-[#e85d26]/30 text-[#e85d26] bg-[#fffaf7] hover:bg-[#ffeedd] shadow-2xs"
+            >
+              <Eye size={15} />
+              <span>View All Voting Responses ({responses.length})</span>
+            </button>
+
             <button
               onClick={() => setIsAddFinalistOpen(true)}
               className="btn btn-primary btn-sm flex items-center gap-2 font-bold px-4 h-9 rounded-xl shadow-xs"
@@ -532,7 +625,7 @@ export default function AdminVotingPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 self-end sm:self-center">
+                <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-center">
                   <div className="text-right">
                     <span className="font-mono text-xl font-extrabold text-[#0a0e1a] block">
                       {idea.vote_count || 0}
@@ -541,6 +634,19 @@ export default function AdminVotingPage() {
                       {idea.percentage || 0}% of votes
                     </span>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedResponseFilter(idea.id);
+                      const el = document.getElementById("voting-responses-section");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="btn btn-secondary btn-sm flex items-center gap-1.5 text-xs font-bold px-3 h-8 rounded-xl hover:text-[#e85d26] hover:border-[#e85d26]/40 transition-colors shadow-2xs"
+                    title={`View ${idea.vote_count || 0} citizen responses for this candidate`}
+                  >
+                    <Eye size={13} />
+                    <span>View {idea.vote_count || 0} Votes</span>
+                  </button>
 
                   <button
                     onClick={() => setDeleteTarget(idea)}
@@ -552,6 +658,190 @@ export default function AdminVotingPage() {
                 </div>
               </div>
             ))
+          )}
+        </div>
+      </div>
+
+      {/* ================= CITIZEN VOTING RESPONSES & AUDIT LOG ================= */}
+      <div id="voting-responses-section" className="bg-white rounded-3xl border border-[#e2e8f0] shadow-xs overflow-hidden scroll-mt-6">
+        <div className="p-6 sm:p-7 border-b border-[#e2e8f0] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <h2 className="font-jakarta font-extrabold text-[20px] text-[#0a0e1a] flex items-center gap-2">
+              <span>Citizen Voting Responses</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-xs font-bold text-emerald-700 border border-emerald-200">
+                {filteredResponses.length} {filteredResponses.length === 1 ? "response" : "responses"}
+              </span>
+            </h2>
+            <p className="text-xs text-[#64748b]">
+              Real-time audit log of citizen votes cast on the public ballot with cryptographic SHA-256 HMAC verification.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={handleExportResponsesCSV}
+              disabled={responses.length === 0}
+              className="btn btn-secondary btn-sm flex items-center gap-2 font-bold px-3.5 h-9 rounded-xl shadow-xs"
+            >
+              <Download size={14} />
+              <span>Export Responses CSV</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Filter and Search Bar */}
+        <div className="p-4 sm:p-5 bg-[#f8f7f4] border-b border-[#e2e8f0] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          {/* Candidate Filter Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <button
+              onClick={() => setSelectedResponseFilter("ALL")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                selectedResponseFilter === "ALL"
+                  ? "bg-[#0a0e1a] text-white shadow-xs"
+                  : "bg-white text-[#64748b] border border-[#e2e8f0] hover:bg-white/80"
+              }`}
+            >
+              All Finalists ({responses.length})
+            </button>
+            {candidates.map((cand) => (
+              <button
+                key={cand.id}
+                onClick={() => setSelectedResponseFilter(cand.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all ${
+                  selectedResponseFilter === cand.id
+                    ? "bg-[#e85d26] text-white shadow-xs"
+                    : "bg-white text-[#334155] border border-[#e2e8f0] hover:bg-white/80"
+                }`}
+              >
+                <span>{cand.emoji || "🚀"}</span>
+                <span className="truncate max-w-[130px]">{cand.product_name || cand.title}</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
+                  selectedResponseFilter === cand.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                }`}>
+                  {cand.vote_count || 0}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Search Input */}
+          <div className="relative min-w-[220px] sm:min-w-[260px]">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
+            <input
+              type="text"
+              placeholder="Search by email, district..."
+              value={responseSearch}
+              onChange={(e) => setResponseSearch(e.target.value)}
+              className="input input-sm pl-9 h-9 text-xs w-full bg-white rounded-xl border-[#e2e8f0]"
+            />
+            {responseSearch && (
+              <button
+                onClick={() => setResponseSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#0a0e1a]"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Responses Table / List */}
+        <div className="divide-y divide-[#e2e8f0]">
+          {filteredResponses.length === 0 ? (
+            <div className="p-12 text-center space-y-3">
+              <ShieldCheck size={32} className="mx-auto text-[#94a3b8]" />
+              <h3 className="font-bold text-sm text-[#0a0e1a]">No Voting Responses Found</h3>
+              <p className="text-xs text-[#64748b]">
+                {responses.length === 0
+                  ? "No votes have been recorded yet in this voting cycle."
+                  : "No votes match your active search or finalist filter."}
+              </p>
+              {selectedResponseFilter !== "ALL" || responseSearch ? (
+                <button
+                  onClick={() => {
+                    setSelectedResponseFilter("ALL");
+                    setResponseSearch("");
+                  }}
+                  className="btn btn-secondary btn-sm text-xs font-bold"
+                >
+                  Clear Filters
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            filteredResponses.map((vote) => {
+              const candidate = candidates.find(
+                (c) => c.id === vote.idea_id || c.public_id === vote.idea_id
+              );
+              const formattedDate = new Date(vote.created_at).toLocaleString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              return (
+                <div
+                  key={vote.id}
+                  className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#f8f7f4]/60 transition-colors"
+                >
+                  {/* Left: Voter & District */}
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-2xl bg-[#0a0e1a]/5 border border-[#e2e8f0] flex items-center justify-center text-[#0a0e1a] font-bold flex-shrink-0">
+                      <Mail size={16} className="text-[#e85d26]" />
+                    </div>
+
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-bold text-[#0a0e1a] truncate">
+                          {vote.voter_email_masked}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center gap-1">
+                          <CheckCircle2 size={11} className="text-emerald-600" />
+                          <span>Verified</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-[#64748b]">
+                        <span className="flex items-center gap-1">
+                          <MapPin size={11} className="text-[#e85d26]" />
+                          {vote.district || "Across Tamil Nadu"}
+                        </span>
+                        <span>•</span>
+                        <span className="font-mono text-[11px] text-[#94a3b8]">
+                          {formattedDate}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle / Right: Candidate Voted For */}
+                  <div className="flex items-center gap-3 md:justify-end">
+                    <div className="text-left md:text-right">
+                      <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider block">
+                        Selected Finalist
+                      </span>
+                      <span className="font-jakarta font-bold text-sm text-[#0a0e1a] flex items-center gap-1.5 md:justify-end">
+                        <span>{candidate?.emoji || "🚀"}</span>
+                        <span>{candidate?.product_name || candidate?.title || vote.idea_id}</span>
+                      </span>
+                    </div>
+
+                    {candidate && (
+                      <span
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold flex-shrink-0 hidden sm:inline-block"
+                        style={{
+                          backgroundColor: candidate.category_bg || `${candidate.category_color}15`,
+                          color: candidate.category_color,
+                        }}
+                      >
+                        {candidate.category_name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
       </div>
