@@ -234,7 +234,7 @@ export default function SubmitFlow() {
           )}
 
           {showReview ? (
-            <div className="bg-white rounded-3xl p-7 sm:p-12 border border-[#e2e8f0] shadow-sm">
+            <div className="bg-white rounded-3xl p-5 sm:p-7 md:p-12 border border-[#e2e8f0] shadow-sm">
               <StepReview
                 formData={formData}
                 onBack={goBack}
@@ -243,7 +243,7 @@ export default function SubmitFlow() {
               />
             </div>
           ) : (
-            <div className="bg-white rounded-3xl p-7 sm:p-12 border border-[#e2e8f0] shadow-sm">
+            <div className="bg-white rounded-3xl p-5 sm:p-7 md:p-12 border border-[#e2e8f0] shadow-sm">
               {currentStep === 1 && (
                 <StepCategory
                   value={formData.category_id}
@@ -288,10 +288,10 @@ export default function SubmitFlow() {
               )}
 
               {/* Navigation */}
-              <div className="flex items-center justify-between mt-12 pt-6 border-t border-[#f1f5f9]">
+              <div className="flex items-center justify-between mt-10 sm:mt-12 pt-6 border-t border-[#f1f5f9]">
                 <button
                   onClick={goBack}
-                  className={`btn btn-secondary flex items-center gap-2 h-12 px-6 rounded-2xl font-bold ${
+                  className={`btn btn-secondary flex items-center gap-2 h-11 sm:h-12 px-4 sm:px-6 rounded-2xl font-bold ${
                     currentStep === 1 ? "invisible" : ""
                   }`}
                 >
@@ -302,7 +302,7 @@ export default function SubmitFlow() {
                 <button
                   onClick={goNext}
                   disabled={!canProceed()}
-                  className="btn btn-primary btn-lg flex items-center gap-2 h-12 px-8 rounded-2xl shadow-lg shadow-[#e85d26]/20 font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="btn btn-primary btn-lg flex items-center gap-2 h-11 sm:h-12 px-5 sm:px-8 rounded-2xl shadow-lg shadow-[#e85d26]/20 font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                   id={`step-${currentStep}-next`}
                 >
                   {currentStep === 5 ? (

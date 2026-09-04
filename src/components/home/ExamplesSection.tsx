@@ -66,7 +66,7 @@ export default function ExamplesSection() {
               </div>
 
               {/* Quote */}
-              <blockquote className="font-jakarta font-medium text-[17px] text-[#0a0e1a] leading-snug mb-4">
+              <blockquote className="font-jakarta font-medium text-[15px] sm:text-[17px] text-[#0a0e1a] leading-snug mb-4">
                 {example.quote}
               </blockquote>
 
@@ -79,7 +79,7 @@ export default function ExamplesSection() {
         </div>
 
         {/* Message */}
-        <div className="bg-white border border-[#e2e8f0] rounded-2xl p-8 text-center max-w-2xl mx-auto">
+        <div className="bg-white border border-[#e2e8f0] rounded-2xl p-5 sm:p-8 text-center max-w-2xl mx-auto">
           <p className="font-jakarta font-bold text-[20px] text-[#0a0e1a] mb-3">
             Your idea is probably just as valid.
           </p>

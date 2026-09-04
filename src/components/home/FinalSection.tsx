@@ -14,20 +14,20 @@ export default function FinalSection() {
           <br />
           We want to hear yours.
         </h2>
-        <p className="text-[#64748b] text-[17px] mb-3 max-w-xl mx-auto">
+        <p className="text-[#64748b] text-[15px] sm:text-[17px] mb-3 max-w-xl mx-auto">
           One problem can start a conversation.
         </p>
-        <p className="text-[#64748b] text-[17px] mb-3 max-w-xl mx-auto">
+        <p className="text-[#64748b] text-[15px] sm:text-[17px] mb-3 max-w-xl mx-auto">
           One idea can become a product.
         </p>
-        <p className="text-[#64748b] text-[17px] mb-12 max-w-xl mx-auto">
+        <p className="text-[#64748b] text-[15px] sm:text-[17px] mb-12 max-w-xl mx-auto">
           One product can help thousands of people.
         </p>
 
         <Link
           href="/submit"
-          className="btn btn-primary btn-lg mx-auto inline-flex"
-          style={{ fontSize: "17px", padding: "18px 40px" }}
+          className="btn btn-primary btn-lg mx-auto inline-flex py-3.5 px-6 sm:py-[18px] sm:px-10"
+          style={{ fontSize: "17px" }}
           id="final-cta"
         >
           Share Your Idea →

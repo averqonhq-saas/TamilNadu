@@ -77,16 +77,16 @@ export default function CtaSection({ campaignStatus = "COLLECTING" }: CtaSection
           {content.headline}
         </h2>
 
-        <p className="text-white/60 text-[17px] sm:text-[19px] max-w-xl mx-auto mb-10 leading-relaxed">
+        <p className="text-white/60 text-[15px] sm:text-[17px] lg:text-[19px] max-w-xl mx-auto mb-10 leading-relaxed">
           {content.sub}
         </p>
 
         {/* CTA */}
         <Link
           href={content.href}
-          className="btn btn-primary btn-lg mx-auto inline-flex font-bold shadow-xl shadow-[#e85d26]/20 hover:shadow-[#e85d26]/40"
+          className="btn btn-primary btn-lg mx-auto inline-flex font-bold shadow-xl shadow-[#e85d26]/20 hover:shadow-[#e85d26]/40 py-3.5 px-6 sm:py-[18px] sm:px-10"
           id="main-cta"
-          style={{ fontSize: "17px", padding: "18px 40px" }}
+          style={{ fontSize: "17px" }}
         >
           {content.buttonText}
         </Link>

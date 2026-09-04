@@ -178,7 +178,7 @@ export default function StepCategory({ value, onChange }: StepCategoryProps) {
             <button
               key={cat.id}
               onClick={() => onChange(cat.id, cat.name)}
-              className={`relative flex flex-col justify-between p-6 rounded-2xl border-2 transition-all duration-200 text-left cursor-pointer group
+              className={`relative flex flex-col justify-between p-4 sm:p-6 rounded-2xl border-2 transition-all duration-200 text-left cursor-pointer group
                 ${
                   isSelected
                     ? "border-[#e85d26] bg-[#fffaf7] shadow-lg shadow-[#e85d26]/15 ring-2 ring-[#e85d26]/20 -translate-y-1"

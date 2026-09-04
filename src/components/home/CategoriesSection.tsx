@@ -56,8 +56,7 @@ export default function CategoriesSection() {
               <Link
                 href={`/submit?category=${category.name.toLowerCase().replace(/\s+/g, "-")}`}
                 key={category.name}
-                className="card card-hover group"
-                style={{ padding: "20px" }}
+                className="card card-hover group p-4 sm:p-5"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
@@ -78,8 +77,7 @@ export default function CategoriesSection() {
           {/* Other card */}
           <Link
             href="/submit"
-            className="card card-hover group border-dashed"
-            style={{ padding: "20px" }}
+            className="card card-hover group border-dashed p-4 sm:p-5"
           >
             <div className="w-10 h-10 rounded-xl bg-[#f1f5f9] flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
               <MoreHorizontal size={20} className="text-[#94a3b8]" />

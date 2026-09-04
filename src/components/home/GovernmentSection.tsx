@@ -5,7 +5,7 @@ export default function GovernmentSection() {
   return (
     <section className="section bg-white border-t border-[#e2e8f0]" aria-labelledby="gov-heading">
       <div className="container">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left */}
           <div>
             <div className="section-eyebrow">
@@ -15,11 +15,11 @@ export default function GovernmentSection() {
             <h2 className="section-title mb-4" id="gov-heading">
               Technology can only go so far alone.
             </h2>
-            <p className="text-[#64748b] text-[16px] leading-relaxed mb-4">
+            <p className="text-[#64748b] text-[15px] sm:text-[16px] leading-relaxed mb-4">
               We can research, design and build technology. But solutions that can serve millions of 
               people often need collaboration between builders, institutions, and government.
             </p>
-            <p className="text-[#64748b] text-[16px] leading-relaxed mb-8">
+            <p className="text-[#64748b] text-[15px] sm:text-[16px] leading-relaxed mb-8">
               If you represent an organization, institution, or government body and are interested in 
               what comes out of this initiative, we'd like to hear from you.
             </p>

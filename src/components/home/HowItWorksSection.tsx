@@ -51,7 +51,7 @@ export default function HowItWorksSection() {
               <div className="relative z-10">
                 {/* Step number */}
                 <div
-                  className="font-jakarta font-black text-[64px] leading-none mb-4 select-none"
+                  className="font-jakarta font-black text-[48px] md:text-[64px] leading-none mb-4 select-none"
                   style={{
                     color: step.accent,
                     opacity: 0.12,
@@ -82,7 +82,7 @@ export default function HowItWorksSection() {
         <div className="mt-20 text-center">
           <div className="inline-flex flex-col items-center gap-4">
             <div className="w-px h-12 bg-gradient-to-b from-transparent to-[#e85d26]" />
-            <p className="font-jakarta font-bold text-[28px] lg:text-[36px] text-[#0a0e1a] tracking-tight">
+            <p className="font-jakarta font-bold text-[22px] sm:text-[28px] lg:text-[36px] text-[#0a0e1a] tracking-tight">
               The winning idea gets built.
             </p>
             <p className="text-[#64748b] text-[16px] max-w-md text-center">

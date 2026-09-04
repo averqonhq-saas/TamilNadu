@@ -89,7 +89,7 @@ export default function VotingNotStarted({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2 p-4.5 rounded-2xl bg-[#f8f7f4] border border-[#e2e8f0]">
               <span className="w-8 h-8 rounded-xl bg-[#e85d26] text-white font-bold flex items-center justify-center text-sm mb-2">
                 1

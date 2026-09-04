@@ -86,8 +86,8 @@ export default function AboutPage() {
         <section className="relative bg-[#060913] text-white pt-24 pb-20 lg:pb-28 overflow-hidden">
           {/* Ambient Glows */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_50%_-10%,rgba(232,93,38,0.18),transparent)]" />
-          <div className="absolute top-1/3 right-10 w-96 h-96 bg-[#e85d26]/12 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-5 left-10 w-96 h-96 bg-[#3b82f6]/10 rounded-full blur-[130px] pointer-events-none" />
+          <div className="absolute top-1/3 right-10 w-96 h-96 bg-[#e85d26]/12 rounded-full blur-[140px] pointer-events-none hidden lg:block" />
+          <div className="absolute bottom-5 left-10 w-96 h-96 bg-[#3b82f6]/10 rounded-full blur-[130px] pointer-events-none hidden lg:block" />
 
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-6">
@@ -98,7 +98,7 @@ export default function AboutPage() {
                 </span>
               </div>
 
-              <h1 className="font-jakarta text-white text-[38px] sm:text-[52px] lg:text-[58px] font-extrabold leading-[1.08] tracking-tight">
+              <h1 className="font-jakarta text-white text-[28px] sm:text-[44px] lg:text-[58px] font-extrabold leading-[1.08] tracking-tight">
                 Great technology starts with a{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b35] via-[#f97316] to-[#f59e0b]">
                   real human struggle.
@@ -136,7 +136,7 @@ export default function AboutPage() {
                 return (
                   <div
                     key={idx}
-                    className="bg-white rounded-3xl p-8 border border-[#e2e8f0] shadow-sm hover:shadow-xl hover:border-[#e85d26]/40 transition-all duration-300 flex flex-col justify-between"
+                    className="bg-white rounded-3xl p-5 sm:p-8 border border-[#e2e8f0] shadow-sm hover:shadow-xl hover:border-[#e85d26]/40 transition-all duration-300 flex flex-col justify-between"
                   >
                     <div>
                       <div

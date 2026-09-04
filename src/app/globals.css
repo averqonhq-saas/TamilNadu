@@ -63,6 +63,8 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Clip decorative blobs that escape bounds without breaking sticky elements */
+    overflow-x: clip;
   }
 
   h1,
@@ -104,6 +106,13 @@
   }
 }
 
+/* Extra-small screens: 320–359px */
+@media (max-width: 359px) {
+  .container {
+    padding: 0 12px;
+  }
+}
+
 /* Section spacing */
 .section {
   padding: 96px 0;
@@ -111,7 +120,13 @@
 
 @media (max-width: 768px) {
   .section {
-    padding: 64px 0;
+    padding: 56px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 44px 0;
   }
 }
 
@@ -187,9 +202,16 @@
 }
 
 .btn-lg {
-  padding: 16px 32px;
-  font-size: 16px;
+  padding: 14px 24px;
+  font-size: 15px;
   border-radius: var(--radius-lg);
+}
+
+@media (min-width: 480px) {
+  .btn-lg {
+    padding: 16px 32px;
+    font-size: 16px;
+  }
 }
 
 .btn-sm {
@@ -319,7 +341,7 @@
 
 .stat-number {
   font-family: var(--font-jakarta);
-  font-size: 48px;
+  font-size: clamp(32px, 8vw, 48px);
   font-weight: 800;
   color: var(--color-navy);
   line-height: 1;
@@ -361,7 +383,7 @@
 }
 
 .section-subtitle {
-  font-size: 18px;
+  font-size: clamp(15px, 4vw, 18px);
   color: var(--color-muted);
   line-height: 1.7;
   max-width: 640px;

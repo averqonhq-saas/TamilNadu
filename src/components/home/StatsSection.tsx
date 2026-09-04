@@ -56,7 +56,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
             <Link
               key={index}
               href={item.href}
-              className="bg-white rounded-2xl p-6 border border-[#e2e8f0] shadow-sm hover:shadow-md hover:border-[#e85d26]/40 transition-all duration-200 group relative flex flex-col justify-between"
+              className="bg-white rounded-2xl p-4 sm:p-6 border border-[#e2e8f0] shadow-sm hover:shadow-md hover:border-[#e85d26]/40 transition-all duration-200 group relative flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-12 h-12 rounded-xl ${item.iconBg} flex items-center justify-center transition-transform group-hover:scale-110`}>
@@ -66,7 +66,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
               </div>
 
               <div>
-                <div className="font-jakarta font-extrabold text-[32px] lg:text-[38px] text-[#0a0e1a] leading-none tracking-tight mb-1">
+                <div className="font-jakarta font-extrabold text-[28px] sm:text-[32px] lg:text-[38px] text-[#0a0e1a] leading-none tracking-tight mb-1">
                   {item.value}
                 </div>
                 <div className="font-bold text-[14px] text-[#0a0e1a] mb-0.5">

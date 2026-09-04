@@ -21,9 +21,9 @@ export default async function IdeasPage() {
       <Navbar campaignStatus={campaignStatus} />
       <main id="main-content" className="bg-[#f8f7f4]">
         {/* Ambient Dark Hero Header */}
-        <div className="relative bg-[#060913] text-white pt-24 pb-16 lg:pb-20 overflow-hidden">
+        <div className="relative bg-[#060913] text-white pt-20 sm:pt-24 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_50%_-10%,rgba(232,93,38,0.16),transparent)]" aria-hidden="true" />
-          <div className="absolute top-1/2 right-10 w-80 h-80 bg-[#e85d26]/10 rounded-full blur-[130px] pointer-events-none" aria-hidden="true" />
+          <div className="absolute top-1/2 right-10 w-80 h-80 bg-[#e85d26]/10 rounded-full blur-[130px] pointer-events-none hidden sm:block" aria-hidden="true" />
 
           <div className="container relative z-10">
             <div className="max-w-3xl space-y-4">
@@ -38,7 +38,7 @@ export default async function IdeasPage() {
                 </div>
               </div>
 
-              <h1 className="font-jakarta font-extrabold text-white text-[34px] sm:text-[46px] lg:text-[52px] leading-tight tracking-tight">
+              <h1 className="font-jakarta font-extrabold text-white text-[26px] sm:text-[40px] lg:text-[52px] leading-tight tracking-tight">
                 What is Tamil Nadu{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b35] via-[#f97316] to-[#f59e0b]">
                   talking about?
@@ -54,7 +54,7 @@ export default async function IdeasPage() {
         </div>
 
         {/* Idea Board */}
-        <div className="container py-10 lg:py-14">
+        <div className="container pt-8 pb-14 sm:pt-10 lg:pt-12 lg:pb-16">
           <IdeaBoard />
         </div>
       </main>

@@ -73,8 +73,8 @@ export default function IdeaBoard() {
   return (
     <div>
       {/* Category Horizontal Quick Chips */}
-      <div className="mb-6 overflow-x-auto pb-2 scrollbar-none">
-        <div className="flex items-center gap-2 min-w-max">
+      <div className="mb-6 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex items-center gap-2 w-max">
           <button
             onClick={() => { setSelectedCategory(""); setPage(1); }}
             className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${
@@ -196,7 +196,7 @@ export default function IdeaBoard() {
 
       {/* Empty State */}
       {!loading && ideas.length === 0 && (
-        <div className="bg-white rounded-3xl p-12 lg:p-16 border border-[#e2e8f0] text-center max-w-xl mx-auto shadow-sm my-8">
+        <div className="bg-white rounded-3xl p-8 sm:p-12 lg:p-16 border border-[#e2e8f0] text-center max-w-xl mx-auto shadow-sm my-8">
           <div className="w-16 h-16 rounded-2xl bg-[#fde8dc] flex items-center justify-center mx-auto mb-5 shadow-xs">
             <Lightbulb size={30} className="text-[#e85d26]" />
           </div>

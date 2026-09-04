@@ -112,20 +112,20 @@ export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }:
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-2 sm:gap-3 group min-w-0"
               aria-label="Build Tamil Nadu home"
             >
               <AppIconBadge size={34} />
-              <div className="flex flex-col leading-tight">
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-col leading-tight min-w-0">
+                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
                   <span
-                    className={`font-jakarta font-extrabold text-[16px] leading-none tracking-tight transition-colors ${
+                    className={`font-jakarta font-extrabold text-[14px] sm:text-[16px] leading-none tracking-tight transition-colors truncate ${
                       useDarkNav ? "text-white" : "text-[#0a0e1a]"
                     }`}
                   >
                     Build Tamil Nadu
                   </span>
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${cta.badgeColor}`}>
+                  <span className={`hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border flex-shrink-0 ${cta.badgeColor}`}>
                     {cta.badge}
                   </span>
                 </div>

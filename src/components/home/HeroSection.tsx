@@ -90,7 +90,7 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
     >
       {/* Ambient Background — reduced from 4 to 2 blur layers for GPU perf */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(232,93,38,0.18),rgba(255,255,255,0))]" aria-hidden="true" />
-      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#e85d26]/10 rounded-full blur-[130px] pointer-events-none" aria-hidden="true" />
+      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#e85d26]/10 rounded-full blur-[130px] pointer-events-none hidden lg:block" aria-hidden="true" />
 
       {/* Subtle dot grid — CSS only */}
       <div
@@ -124,7 +124,7 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
 
             {/* Headline — this is the LCP element, fully server-rendered */}
             <div>
-              <h1 className="font-jakarta text-white text-[38px] sm:text-[54px] lg:text-[62px] font-extrabold leading-[1.08] tracking-tight">
+              <h1 className="font-jakarta text-white text-[28px] xs:text-[34px] sm:text-[52px] lg:text-[62px] font-extrabold leading-[1.08] tracking-tight">
                 <span className="text-white">What should we</span>{" "}
                 <span className="relative inline-block px-1.5">
                   <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b35] via-[#f97316] to-[#f59e0b]">
@@ -146,7 +146,7 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
             </div>
 
             {/* Core description */}
-            <p className="text-white/70 text-[16px] sm:text-[18px] leading-relaxed max-w-2xl font-normal">
+            <p className="text-white/70 text-[14px] sm:text-[16px] lg:text-[18px] leading-relaxed max-w-2xl font-normal">
               From bus routes in Madurai to farm insights in Thanjavur — real citizens know what hurts most.
               Submit everyday challenges in <strong className="text-white font-semibold">Tamil or English</strong> text.
               The community votes, and open-source engineers build it.
@@ -199,12 +199,12 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
                 <Sparkles size={13} className="text-[#f59e0b]" />
                 <span>Explore or submit by theme</span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {QUICK_CATEGORIES.map((cat) => (
                   <Link
                     key={cat.id}
                     href={`/submit?category=${cat.id}`}
-                    className="text-[12.5px] font-medium px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-200"
+                    className="text-[12px] sm:text-[12.5px] font-medium px-2.5 sm:px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-200"
                   >
                     {cat.label}
                   </Link>
@@ -214,7 +214,7 @@ export default function HeroSection({ campaignStatus = "COLLECTING" }: HeroSecti
           </div>
 
           {/* ===== RIGHT: Interactive Carousel (Client-only, loaded after paint) ===== */}
-          <div className="lg:col-span-5 relative mt-4 lg:mt-0">
+          <div className="lg:col-span-5 relative mt-4 lg:mt-0 overflow-visible">
             <Suspense
               fallback={
                 <div className="rounded-3xl bg-white/[0.04] border border-white/10 h-[420px] animate-pulse" />
