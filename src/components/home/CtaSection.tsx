@@ -82,14 +82,24 @@ export default function CtaSection({ campaignStatus = "COLLECTING" }: CtaSection
         </p>
 
         {/* CTA */}
-        <Link
-          href={content.href}
-          className="btn btn-primary btn-lg mx-auto inline-flex font-bold shadow-xl shadow-[#e85d26]/20 hover:shadow-[#e85d26]/40 py-3.5 px-6 sm:py-[18px] sm:px-10"
-          id="main-cta"
-          style={{ fontSize: "17px" }}
-        >
-          {content.buttonText}
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
+          <Link
+            href={content.href}
+            className="btn btn-primary btn-lg inline-flex font-bold shadow-xl shadow-[#e85d26]/20 hover:shadow-[#e85d26]/40 py-3.5 px-6 sm:py-[18px] sm:px-10"
+            id="main-cta"
+            style={{ fontSize: "17px" }}
+          >
+            {content.buttonText}
+          </Link>
+          {campaignStatus === "VOTING" && (
+            <Link
+              href="/submit"
+              className="btn btn-secondary border-white/20 text-white hover:bg-white/10 py-3.5 px-6 sm:py-[18px] sm:px-8 font-bold text-[15px]"
+            >
+              Submit an Idea for Next Cycle →
+            </Link>
+          )}
+        </div>
 
         {/* Reassurance */}
         <div className="flex items-center justify-center gap-2 mt-5 text-white/40 text-[13px]">

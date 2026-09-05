@@ -1,16 +1,26 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import {
   Vote,
+  Sparkles,
+  CheckCircle2,
   Clock,
   ArrowRight,
+  ShieldCheck,
   MapPin,
   Users,
+  ChevronRight,
   X,
   AlertCircle,
+  HelpCircle,
   Mail,
   Loader2,
+  Check,
+  TrendingUp,
+  Layers,
+  Building2,
 } from "lucide-react";
 import { ShortlistedIdea } from "@/lib/constants/campaign";
 import { toast } from "sonner";
@@ -29,7 +39,11 @@ export default function VotingPoll({
   const [selectedId, setSelectedId] = useState<string>("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [maskedEmail, setMaskedEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRequestingOtp, setIsRequestingOtp] = useState(false);
 
   const selectedIdea = useMemo(
     () => shortlistedIdeas.find((i) => i.id === selectedId || i.public_id === selectedId),
@@ -67,12 +81,42 @@ export default function VotingPoll({
     return () => clearInterval(interval);
   }, [votingEnd]);
 
-  // Submit Vote directly without OTP
-  const handleFinalVote = async (e?: React.FormEvent) => {
+  // Request OTP
+  const handleRequestOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!selectedIdea) return;
     if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address to confirm your vote.");
+      toast.error("Please enter a valid email address to verify your vote.");
+      return;
+    }
+
+    setIsRequestingOtp(true);
+    try {
+      const res = await fetch("/api/vote/request-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send verification code");
+
+      setOtpSent(true);
+      setMaskedEmail(data.masked_email || email);
+      if (data.debug_code) {
+        setOtp(data.debug_code); // auto-fill for frictionless verification in testing
+      }
+      toast.success("Verification code dispatched to your email!");
+    } catch (err: any) {
+      toast.error(err.message || "Could not send verification code.");
+    } finally {
+      setIsRequestingOtp(false);
+    }
+  };
+
+  // Submit Final Vote
+  const handleFinalVote = async () => {
+    if (!selectedIdea) return;
+    if (!email) {
+      toast.error("Please enter your email to confirm your vote.");
       return;
     }
 
@@ -83,7 +127,8 @@ export default function VotingPoll({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ideaId: selectedIdea.id,
-          email: email.trim().toLowerCase(),
+          email,
+          otp,
           district: selectedIdea.district,
         }),
       });
@@ -175,7 +220,7 @@ export default function VotingPoll({
       </div>
 
       {/* ================= POLL CONTENT AREA ================= */}
-      <div className="container max-w-4xl pt-12 sm:pt-16">
+      <div className="container max-w-4xl pt-12 sm:pt-16 mt-5">
         {/* Section Heading */}
         <div className="text-center sm:text-left mb-8 pb-4 border-b border-[#e2e8f0]">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
@@ -215,11 +260,10 @@ export default function VotingPoll({
                 role="radio"
                 aria-checked={isSelected}
                 tabIndex={0}
-                className={`relative bg-white rounded-3xl p-6 sm:p-8 border-2 transition-all duration-200 cursor-pointer shadow-xs group hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#e85d26] ${
-                  isSelected
+                className={`relative bg-white rounded-3xl p-6 sm:p-8 border-2 transition-all duration-200 cursor-pointer shadow-xs group hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#e85d26] ${isSelected
                     ? "border-[#e85d26] bg-[#fffaf7] ring-4 ring-[#e85d26]/15 -translate-y-0.5 shadow-md"
                     : "border-[#e2e8f0] hover:border-[#cbd5e1]"
-                }`}
+                  }`}
               >
                 {/* Accent Top Bar */}
                 <div
@@ -231,11 +275,10 @@ export default function VotingPoll({
                   {/* Custom Radio Select Ring */}
                   <div className="pt-1 flex-shrink-0">
                     <div
-                      className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                        isSelected
+                      className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${isSelected
                           ? "border-[#e85d26] bg-[#e85d26] shadow-sm shadow-[#e85d26]/40"
                           : "border-[#cbd5e1] bg-white group-hover:border-[#94a3b8]"
-                      }`}
+                        }`}
                     >
                       {isSelected ? (
                         <div className="w-2.5 h-2.5 rounded-full bg-white animate-scale-in" />
@@ -319,6 +362,30 @@ export default function VotingPoll({
               </div>
             );
           })}
+        </div>
+
+        {/* ================= PROCESS EXPLANATION CARD ================= */}
+        <div className="bg-white rounded-3xl p-7 sm:p-9 border border-[#e2e8f0] shadow-sm mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-xl">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#e85d26] uppercase">
+              <HelpCircle size={14} />
+              <span>Civic Democracy In Action</span>
+            </div>
+            <h3 className="font-jakarta font-bold text-[20px] text-[#0a0e1a]">
+              Why are there only 5 options?
+            </h3>
+            <p className="text-[#64748b] text-[14px] leading-relaxed">
+              We keep the public poll focused on 5 genuinely strong, clustered product ideas. This ensures every citizen can read and compare them clearly, leading to a decisive and powerful mandate for Tamil Nadu.
+            </p>
+          </div>
+
+          <Link
+            href="/about"
+            className="btn btn-secondary flex items-center gap-2 whitespace-nowrap font-bold text-sm h-11 px-5 rounded-xl"
+          >
+            <span>Explore The 7-Step Process</span>
+            <ChevronRight size={15} />
+          </Link>
         </div>
       </div>
 
@@ -406,8 +473,18 @@ export default function VotingPoll({
               </div>
             </div>
 
-            {/* Vote Form */}
-            <form onSubmit={handleFinalVote} className="space-y-4 mb-5">
+            {/* Verification Form */}
+            <form
+              onSubmit={
+                otpSent
+                  ? (e) => {
+                    e.preventDefault();
+                    handleFinalVote();
+                  }
+                  : handleRequestOtp
+              }
+              className="space-y-4 mb-5"
+            >
               <div>
                 <label htmlFor="voter-email" className="block text-[13.5px] font-bold text-[#0a0e1a] mb-1.5">
                   Enter your email address to record your choice:
@@ -418,7 +495,7 @@ export default function VotingPoll({
                     id="voter-email"
                     type="email"
                     required
-                    disabled={isSubmitting}
+                    disabled={otpSent || isSubmitting}
                     className="input pl-10 h-11 text-[14px]"
                     placeholder="you@example.com"
                     value={email}
@@ -430,28 +507,66 @@ export default function VotingPoll({
                 </p>
               </div>
 
-              {/* Irreversible Notice */}
-              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-[#fffbeb] border border-[#fde68a] text-[12.5px] text-[#92400e]">
-                <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-[#d97706]" />
-                <span>
-                  <strong>Notice:</strong> Once submitted, your vote can&apos;t be changed.
-                </span>
-              </div>
+              {otpSent && (
+                <div className="animate-fade-in bg-[#f0fdf4] p-4 rounded-2xl border border-[#bbf7d0]">
+                  <label htmlFor="voter-otp" className="block text-[13px] font-bold text-[#166534] mb-1.5">
+                    Enter the 6-digit verification code sent to {maskedEmail}:
+                  </label>
+                  <input
+                    id="voter-otp"
+                    type="text"
+                    required
+                    maxLength={6}
+                    autoFocus
+                    className="input h-11 text-center font-mono font-bold tracking-widest text-[16px] bg-white"
+                    placeholder="123456"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                  />
+                </div>
+              )}
+            </form>
 
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {/* Irreversible Notice */}
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-[#fffbeb] border border-[#fde68a] text-[12.5px] text-[#92400e] mb-6">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-[#d97706]" />
+              <span>
+                <strong>Notice:</strong> Once submitted, your vote can&apos;t be changed.
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setIsConfirmOpen(false)}
+                disabled={isSubmitting}
+                className="btn btn-secondary flex-1 justify-center h-12 rounded-2xl font-bold"
+              >
+                Go Back
+              </button>
+
+              {!otpSent ? (
                 <button
                   type="button"
-                  onClick={() => setIsConfirmOpen(false)}
-                  disabled={isSubmitting}
-                  className="btn btn-secondary flex-1 justify-center h-12 rounded-2xl font-bold"
+                  onClick={handleRequestOtp}
+                  disabled={!email || isRequestingOtp}
+                  className="btn btn-primary flex-1 justify-center h-12 rounded-2xl font-bold shadow-md shadow-[#e85d26]/20 disabled:opacity-40"
                 >
-                  Go Back
+                  {isRequestingOtp ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <span>Confirm My Vote</span>
+                  )}
                 </button>
-
+              ) : (
                 <button
-                  type="submit"
-                  disabled={!email || isSubmitting}
+                  type="button"
+                  onClick={handleFinalVote}
+                  disabled={isSubmitting}
                   className="btn btn-primary flex-1 justify-center h-12 rounded-2xl font-bold shadow-md shadow-[#e85d26]/20 disabled:opacity-40"
                 >
                   {isSubmitting ? (
@@ -463,8 +578,8 @@ export default function VotingPoll({
                     <span>Confirm My Vote 🇮🇳</span>
                   )}
                 </button>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         </div>
       )}

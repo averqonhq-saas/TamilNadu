@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Vote,
-  Clock,
   ArrowRight,
   MapPin,
   Users,
@@ -11,13 +11,14 @@ import {
   AlertCircle,
   Mail,
   Loader2,
+  Lightbulb,
 } from "lucide-react";
 import { ShortlistedIdea } from "@/lib/constants/campaign";
 import { toast } from "sonner";
 
 interface VotingBallotProps {
   shortlistedIdeas: ShortlistedIdea[];
-  votingEnd: string | Date | null;
+  votingEnd?: string | Date | null;
   onVoteSuccess: (votedData: { idea: ShortlistedIdea; emailMasked: string }) => void;
 }
 
@@ -35,37 +36,6 @@ export default function VotingBallot({
     () => shortlistedIdeas.find((i) => i.id === selectedId || i.public_id === selectedId),
     [shortlistedIdeas, selectedId]
   );
-
-  // Dynamic countdown timer
-  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({
-    days: 5,
-    hours: 12,
-    minutes: 45,
-    seconds: 0,
-  });
-
-  useEffect(() => {
-    if (!votingEnd) return;
-    const target = new Date(votingEnd).getTime();
-
-    const updateTimer = () => {
-      const now = new Date().getTime();
-      const diff = target - now;
-      if (diff <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      setTimeLeft({ days, hours, minutes, seconds });
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, [votingEnd]);
 
   // Submit Vote directly without OTP
   const handleFinalVote = async (e?: React.FormEvent) => {
@@ -114,13 +84,13 @@ export default function VotingBallot({
   return (
     <div className="pb-32">
       {/* ================= HERO: TAMIL NADU, YOU DECIDE ================= */}
-      <div className="bg-[#060913] text-white pt-24 pb-16 lg:pb-20 border-b border-white/10 relative overflow-hidden">
+      <div className="bg-[#060913] text-white pt-32 sm:pt-40 lg:pt-44 pb-16 lg:pb-20 border-b border-white/10 relative overflow-hidden">
         {/* Glows */}
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#e85d26]/15 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-80 h-80 bg-[#3b82f6]/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="container relative z-10 max-w-4xl text-center space-y-5">
-          {/* Status & Deadline pill */}
+        <div className="container relative z-10 max-w-4xl text-center space-y-5 pt-4 sm:pt-6">
+          {/* Status pill */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider shadow-xs">
               <span className="relative flex h-2 w-2">
@@ -128,13 +98,6 @@ export default function VotingBallot({
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
               <span>PUBLIC POLL IS LIVE</span>
-            </div>
-
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-white/90 text-xs font-bold font-mono">
-              <Clock size={13} className="text-[#fb923c]" />
-              <span>
-                Voting closes in {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
-              </span>
             </div>
           </div>
 
@@ -156,7 +119,7 @@ export default function VotingBallot({
           </div>
 
           {/* ================= THE CIVIC JOURNEY FUNNEL ================= */}
-          <div className="pt-6">
+          <div className="pt-6 space-y-3">
             <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-white/[0.04] border border-white/10 p-2.5 sm:p-3 rounded-2xl text-[11px] sm:text-[12px] text-white/70 font-semibold backdrop-blur-md">
               <span className="text-white/50">Thousands of submissions</span>
               <span className="text-[#fb923c]">→</span>
@@ -170,14 +133,24 @@ export default function VotingBallot({
               <span className="text-[#fb923c]">→</span>
               <span className="text-emerald-400 font-bold">We Build It 🚀</span>
             </div>
+
+            <div>
+              <Link
+                href="/submit"
+                className="inline-flex items-center gap-1.5 text-[12.5px] text-white/75 hover:text-white transition-colors underline underline-offset-4"
+              >
+                <Lightbulb size={13} className="text-[#fb923c]" />
+                <span>Don&apos;t see your problem? Submit your idea for the next cycle →</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ================= POLL CONTENT AREA ================= */}
-      <div className="container max-w-4xl pt-12 sm:pt-16">
+      <div className="container max-w-4xl pt-16 sm:pt-24 mt-2 sm:mt-4">
         {/* Section Heading */}
-        <div className="text-center sm:text-left mb-8 pb-4 border-b border-[#e2e8f0]">
+        <div className="text-center sm:text-left mb-10 pb-5 border-b border-[#e2e8f0]">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <div>
               <span className="text-xs font-bold text-[#e85d26] uppercase tracking-wider block mb-1">
@@ -320,6 +293,33 @@ export default function VotingBallot({
             );
           })}
         </div>
+
+        {/* ================= DIDN'T FIND YOUR PROBLEM? SUBMIT YOUR IDEA ================= */}
+        <div className="bg-gradient-to-br from-[#fff7ed] via-[#fffaf5] to-white rounded-3xl p-6 sm:p-9 border-2 border-[#fed7aa] shadow-sm relative overflow-hidden mb-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2.5 max-w-xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ea580c]/10 text-[#ea580c] text-xs font-bold uppercase tracking-wider">
+                <Lightbulb size={14} className="text-[#ea580c]" />
+                <span>Submissions Open Year-Round</span>
+              </div>
+              <h3 className="font-jakarta font-extrabold text-[20px] sm:text-[24px] text-[#0a0e1a] tracking-tight">
+                Don&apos;t see your district&apos;s problem on this ballot?
+              </h3>
+              <p className="text-[14px] sm:text-[15px] text-[#475569] leading-relaxed">
+                We collect real citizen problems from all 38 districts across Tamil Nadu continuously. Share your civic problem or tech idea now to be considered for our next public voting shortlist.
+              </p>
+            </div>
+            <Link
+              href="/submit"
+              className="btn bg-[#0a0e1a] hover:bg-[#1e293b] text-white flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-sm shadow-md transition-all hover:scale-[1.02] flex-shrink-0 w-full sm:w-auto justify-center"
+              id="ballot-submit-idea-btn"
+            >
+              <Lightbulb size={16} className="text-[#fb923c]" />
+              <span>Submit Your Idea / Problem</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* ================= STICKY BOTTOM VOTING ACTION BAR ================= */}
@@ -337,9 +337,19 @@ export default function VotingBallot({
                 </p>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-[13px] sm:text-[14px] text-[#64748b] font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#e85d26] animate-ping" />
-                <span>Tap any product concept above to make your choice</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12.5px] sm:text-[14px] text-[#64748b] font-medium">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#e85d26] animate-ping" />
+                  <span>Tap any product concept to vote</span>
+                </span>
+                <span className="hidden sm:inline text-[#cbd5e1]">•</span>
+                <Link
+                  href="/submit"
+                  className="text-[#e85d26] font-bold hover:underline inline-flex items-center gap-1"
+                >
+                  <Lightbulb size={13} />
+                  <span>or submit your own idea</span>
+                </Link>
               </div>
             )}
           </div>

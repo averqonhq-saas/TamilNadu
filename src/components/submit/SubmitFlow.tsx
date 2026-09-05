@@ -156,62 +156,134 @@ export default function SubmitFlow() {
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] pb-28">
-      {/* Top Stepper Banner */}
-      <div className="bg-white border-b border-[#e2e8f0] shadow-xs">
-        <div className="container py-5 sm:py-6">
-          <div className="max-w-3xl mx-auto">
+      {/* ================= REDESIGNED CIVIC STEP TRACKER ================= */}
+      <div className="container pt-6 sm:pt-8 pb-4 sm:pb-6 mt-5">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-3xl border border-[#e2e8f0] shadow-sm p-4 sm:p-6 transition-all">
             {!showReview ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold text-[#64748b]">
-                  <span className="flex items-center gap-2 text-[#e85d26] text-[13px]">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#e85d26]" />
-                    Step {currentStep} of 5: {STEPS[currentStep - 1].label}
-                  </span>
-                  <span className="text-[#94a3b8] font-mono text-[12px] bg-[#f8f7f4] px-2.5 py-0.5 rounded-md border border-[#e2e8f0]">
-                    {Math.round((currentStep / 5) * 100)}% Completed
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-5 gap-2.5">
-                  {STEPS.map((step) => {
-                    const isCompleted = step.id < currentStep;
-                    const isCurrent = step.id === currentStep;
-                    return (
-                      <div
-                        key={step.id}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          isCompleted
-                            ? "bg-[#22c55e]"
-                            : isCurrent
-                            ? "bg-[#e85d26] shadow-sm shadow-[#e85d26]/40"
-                            : "bg-[#e2e8f0]"
-                        }`}
-                      />
-                    );
-                  })}
-                </div>
-
-                <div className="grid grid-cols-5 text-center text-[11px] sm:text-[12px] font-semibold text-[#64748b] pt-0.5">
-                  {STEPS.map((step) => (
-                    <span
-                      key={step.id}
-                      className={`truncate transition-colors ${
-                        step.id === currentStep
-                          ? "text-[#e85d26] font-bold"
-                          : step.id < currentStep
-                          ? "text-[#22c55e]"
-                          : "text-[#94a3b8]"
-                      }`}
-                    >
-                      {step.label} <span className="font-tamil opacity-80 hidden sm:inline">({step.labelTamil})</span>
+              <div className="space-y-4">
+                {/* Header row: Step pill, current title, and % completed */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#f1f5f9]">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e85d26]/10 border border-[#e85d26]/20 text-[#e85d26] text-[11.5px] font-bold uppercase tracking-wider flex-shrink-0">
+                      <span className="w-2 h-2 rounded-full bg-[#e85d26] animate-pulse" />
+                      Step {currentStep} of 5
                     </span>
-                  ))}
+                    <span className="font-jakarta font-extrabold text-[15px] sm:text-[16px] text-[#0a0e1a] truncate">
+                      {STEPS[currentStep - 1].label}
+                    </span>
+                    <span className="text-[12px] font-tamil text-[#e85d26] font-semibold hidden sm:inline">
+                      ({STEPS[currentStep - 1].labelTamil})
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-[#64748b] bg-[#f8f7f4] px-2.5 py-1 rounded-lg border border-[#e2e8f0]">
+                      {Math.round((currentStep / 5) * 100)}% Completed
+                    </span>
+                  </div>
+                </div>
+
+                {/* Connected Step Nodes */}
+                <div className="relative pt-1">
+                  {/* Background Progress Rail */}
+                  <div className="absolute top-[17px] left-6 right-6 h-1 bg-[#f1f5f9] rounded-full -z-0" />
+                  {/* Active Progress Fill */}
+                  <div
+                    className="absolute top-[17px] left-6 h-1 bg-gradient-to-r from-[#e85d26] via-[#f97316] to-[#f59e0b] rounded-full transition-all duration-500 -z-0"
+                    style={{
+                      width: `${((Math.max(1, currentStep) - 1) / 4) * 100}%`,
+                      maxWidth: "calc(100% - 48px)",
+                    }}
+                  />
+
+                  {/* 5 Step Indicator Nodes */}
+                  <div className="grid grid-cols-5 relative z-10">
+                    {STEPS.map((step) => {
+                      const isCompleted = step.id < currentStep;
+                      const isCurrent = step.id === currentStep;
+                      const canClick = step.id < currentStep;
+
+                      return (
+                        <div
+                          key={step.id}
+                          onClick={() => {
+                            if (canClick) {
+                              setShowReview(false);
+                              setCurrentStep(step.id);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }
+                          }}
+                          className={`flex flex-col items-center text-center group ${
+                            canClick ? "cursor-pointer" : "cursor-default"
+                          }`}
+                        >
+                          {/* Circle Icon / Number */}
+                          <div
+                            className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-[13px] transition-all duration-300 ${
+                              isCompleted
+                                ? "bg-[#16a34a] text-white shadow-sm shadow-[#16a34a]/30 group-hover:scale-110"
+                                : isCurrent
+                                ? "bg-[#e85d26] text-white ring-4 ring-[#e85d26]/20 shadow-md shadow-[#e85d26]/30 scale-105"
+                                : "bg-white text-[#94a3b8] border-2 border-[#e2e8f0]"
+                            }`}
+                          >
+                            {isCompleted ? (
+                              <Check size={16} strokeWidth={2.5} />
+                            ) : (
+                              <span>0{step.id}</span>
+                            )}
+                          </div>
+
+                          {/* Step Label */}
+                          <span
+                            className={`mt-2 text-[11px] sm:text-[12px] font-bold tracking-tight transition-colors line-clamp-1 ${
+                              isCurrent
+                                ? "text-[#e85d26]"
+                                : isCompleted
+                                ? "text-[#16a34a] group-hover:text-[#0a0e1a]"
+                                : "text-[#94a3b8]"
+                            }`}
+                          >
+                            {step.label}
+                          </span>
+                          <span
+                            className={`text-[10px] font-tamil hidden sm:block ${
+                              isCurrent
+                                ? "text-[#e85d26]/80 font-medium"
+                                : "text-[#94a3b8]"
+                            }`}
+                          >
+                            {step.labelTamil}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center gap-2 text-[14px] font-bold text-[#16a34a] py-1">
-                <Check size={18} />
-                <span>All 5 steps completed — Ready for Final Review</span>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-1 px-2 text-center sm:text-left">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#16a34a] text-white flex items-center justify-center shadow-md shadow-[#16a34a]/20 flex-shrink-0">
+                    <Check size={20} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h3 className="font-jakarta font-extrabold text-[16px] text-[#0a0e1a]">
+                      All 5 Steps Completed
+                    </h3>
+                    <p className="text-xs text-[#64748b]">
+                      Please review your problem details below before final submission.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowReview(false)}
+                  className="btn btn-secondary btn-sm rounded-xl text-xs font-bold text-[#e85d26] hover:bg-[#e85d26]/10 hover:border-[#e85d26]/30 transition-colors"
+                >
+                  Edit Answers
+                </button>
               </div>
             )}
           </div>
@@ -219,7 +291,7 @@ export default function SubmitFlow() {
       </div>
 
       {/* Main Content */}
-      <div className="container pt-10 sm:pt-14">
+      <div className="container pt-6 sm:pt-10 lg:pt-12">
         <div className={`${containerMaxWidth} mx-auto transition-all duration-300`}>
           {/* Submission error banner */}
           {submitError && (

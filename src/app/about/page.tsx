@@ -83,13 +83,13 @@ export default function AboutPage() {
       <Navbar />
       <main id="main-content" className="bg-[#f8f7f4]">
         {/* ================= HERO HEADER ================= */}
-        <section className="relative bg-[#060913] text-white pt-24 pb-20 lg:pb-28 overflow-hidden">
+        <section className="relative bg-[#060913] text-white pt-32 sm:pt-40 lg:pt-44 pb-20 lg:pb-28 overflow-hidden">
           {/* Ambient Glows */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_50%_-10%,rgba(232,93,38,0.18),transparent)]" />
           <div className="absolute top-1/3 right-10 w-96 h-96 bg-[#e85d26]/12 rounded-full blur-[140px] pointer-events-none hidden lg:block" />
           <div className="absolute bottom-5 left-10 w-96 h-96 bg-[#3b82f6]/10 rounded-full blur-[130px] pointer-events-none hidden lg:block" />
 
-          <div className="container relative z-10">
+          <div className="container relative z-10 pt-4 sm:pt-6">
             <div className="max-w-3xl mx-auto text-center space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-md">
                 <Sparkles size={14} className="text-[#f59e0b]" />

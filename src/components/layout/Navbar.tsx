@@ -5,14 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronRight, Sparkles, Vote, Trophy, Rocket } from "lucide-react";
 import { AppIconBadge } from "@/components/brand/Logo";
-import type { CampaignStatus } from "@/lib/constants/campaign";
+import { DEFAULT_CAMPAIGN, type CampaignStatus } from "@/lib/constants/campaign";
 
 interface NavbarProps {
   /** Campaign status passed from server — no client fetch needed */
   campaignStatus?: CampaignStatus;
 }
 
-export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }: NavbarProps) {
+export default function Navbar({ campaignStatus: initialStatus = DEFAULT_CAMPAIGN.status }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [campaignStatus, setCampaignStatus] = useState<CampaignStatus>(initialStatus);
@@ -46,7 +46,8 @@ export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }:
     };
   }, [isMobileOpen]);
 
-  const useDarkNav = isHomePage && !isScrolled;
+  const isDarkHeroPage = isHomePage || pathname === "/ideas" || pathname === "/about" || pathname === "/vote";
+  const useDarkNav = isDarkHeroPage && !isScrolled;
 
   const getCtaConfig = () => {
     switch (campaignStatus) {
@@ -146,6 +147,9 @@ export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }:
               </NavLink>
               <NavLink href="/about" isDark={useDarkNav}>
                 About
+              </NavLink>
+              <NavLink href="/submit" isDark={useDarkNav}>
+                Share an Idea
               </NavLink>
               <span className={`mx-2 text-[13px] ${useDarkNav ? "text-white/20" : "text-[#e2e8f0]"}`}>
                 |
@@ -249,6 +253,9 @@ export default function Navbar({ campaignStatus: initialStatus = "COLLECTING" }:
             </MobileNavLink>
             <MobileNavLink href="/about" onClick={() => setIsMobileOpen(false)}>
               About the Initiative
+            </MobileNavLink>
+            <MobileNavLink href="/submit" onClick={() => setIsMobileOpen(false)}>
+              Share an Idea / Problem
             </MobileNavLink>
             <div className="pt-3 pb-1">
               <Link

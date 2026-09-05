@@ -17,6 +17,7 @@ import {
   Info,
   ShieldAlert,
   Trophy,
+  Lightbulb,
 } from "lucide-react";
 import { CampaignStatus, DEFAULT_CAMPAIGN } from "@/lib/constants/campaign";
 
@@ -272,15 +273,24 @@ export default function VotingSection({
             {/* CTA Group */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
               {isVotingOpen ? (
-                <Link
-                  href="/vote"
-                  className="btn btn-primary btn-lg flex items-center gap-2.5 shadow-xl shadow-[#e85d26]/25 hover:shadow-[#e85d26]/40 text-[15px] font-bold w-full sm:w-auto justify-center"
-                  id="voting-cta-btn"
-                >
-                  <Vote size={18} />
-                  <span>Cast Your Vote in Public Poll</span>
-                  <ArrowRight size={17} />
-                </Link>
+                <>
+                  <Link
+                    href="/vote"
+                    className="btn btn-primary btn-lg flex items-center gap-2.5 shadow-xl shadow-[#e85d26]/25 hover:shadow-[#e85d26]/40 text-[15px] font-bold w-full sm:w-auto justify-center"
+                    id="voting-cta-btn"
+                  >
+                    <Vote size={18} />
+                    <span>Cast Your Vote in Public Poll</span>
+                    <ArrowRight size={17} />
+                  </Link>
+                  <Link
+                    href="/submit"
+                    className="btn btn-secondary border-white/20 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 h-12 px-5 rounded-2xl font-bold text-[13.5px] w-full sm:w-auto justify-center"
+                  >
+                    <Lightbulb size={15} className="text-[#fb923c]" />
+                    <span>Submit an Idea</span>
+                  </Link>
+                </>
               ) : isResultsOrWinner ? (
                 <Link
                   href="/vote"

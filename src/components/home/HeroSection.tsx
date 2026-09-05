@@ -32,8 +32,8 @@ function getHeroPill(campaignStatus: CampaignStatus) {
         dotColor: "bg-emerald-400",
         ctaHref: "/vote",
         ctaLabel: "Cast Your Vote Now",
-        secHref: "/vote",
-        secLabel: "Explore Candidates",
+        secHref: "/submit",
+        secLabel: "Submit an Idea",
       };
     case "RESULTS":
     case "WINNER":

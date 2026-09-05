@@ -150,12 +150,12 @@ interface StepCategoryProps {
 
 export default function StepCategory({ value, onChange }: StepCategoryProps) {
   return (
-    <div className="w-full">
+    <div className="w-full mb-6">
       {/* Step Header with balanced spacing */}
       <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#e85d26]/10 text-[#e85d26] text-[12px] font-bold uppercase tracking-wider mb-4">
           <Sparkles size={14} />
-          <span>Step 1 of 5 • Phase 1 Ingestion</span>
+          <span>Choose Category • Phase 1 Ingestion</span>
         </div>
         <h2 className="font-jakarta font-extrabold text-[28px] sm:text-[36px] text-[#0a0e1a] tracking-tight leading-tight mb-2.5">
           What area of Tamil Nadu needs technology?

@@ -18,7 +18,7 @@ export default async function SubmitPage() {
   return (
     <>
       <Navbar campaignStatus={campaignStatus} />
-      <main className="pt-[76px] lg:pt-[84px]">
+      <main className="pt-24 sm:pt-28 lg:pt-32">
         <SubmitFlow />
       </main>
       <Footer siteName={siteName} supportEmail={supportEmail} campaignStatus={campaignStatus} />

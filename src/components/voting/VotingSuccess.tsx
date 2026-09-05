@@ -18,6 +18,7 @@ import {
   MessageCircle,
   RotateCcw,
   Loader2,
+  Lightbulb,
 } from "lucide-react";
 import { ShortlistedIdea, SITE_URL } from "@/lib/constants/campaign";
 import { toast } from "sonner";
@@ -205,19 +206,51 @@ export default function VotingSuccess({
             </div>
           </div>
 
-          {/* Action Ribbon: Submit Another Poll Option & Follow Build */}
-          <div className="pt-5 border-t border-[#f1f5f9] flex flex-col sm:flex-row items-center justify-center gap-3.5">
+          {/* Idea Submission Callout for Next Episode */}
+          <div className="bg-gradient-to-br from-[#fff7ed] via-[#fffaf5] to-white rounded-2xl p-5 sm:p-6 border border-[#fed7aa] text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#ea580c] uppercase tracking-wider">
+                <Lightbulb size={13} />
+                <span>Have an idea of your own?</span>
+              </div>
+              <h3 className="font-jakarta font-bold text-[15.5px] sm:text-[17px] text-[#0a0e1a]">
+                Submit a problem from your district for Episode 2
+              </h3>
+              <p className="text-[12.5px] text-[#64748b] leading-relaxed">
+                Problem submissions remain active year-round across all 38 districts. Tell us what else Tamil Nadu needs built.
+              </p>
+            </div>
+            <Link
+              href="/submit"
+              className="btn btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs flex-shrink-0 shadow-md shadow-[#e85d26]/20 w-full sm:w-auto justify-center"
+              id="success-submit-idea-btn"
+            >
+              <span>Submit Idea</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Action Ribbon: Submit Idea, Vote Again, & Follow Build */}
+          <div className="pt-5 border-t border-[#f1f5f9] flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/submit"
+              className="btn btn-secondary flex items-center justify-center gap-2 h-12 px-5 rounded-2xl font-bold text-xs w-full sm:w-auto hover:border-[#e85d26] hover:text-[#e85d26] transition-all"
+            >
+              <Lightbulb size={15} className="text-[#e85d26]" />
+              <span>Submit Another Idea</span>
+            </Link>
+
             <button
               onClick={handleResetVote}
               disabled={isResetting}
-              className="btn btn-secondary flex items-center justify-center gap-2 h-12 px-6 rounded-2xl font-bold text-xs w-full sm:w-auto hover:border-[#e85d26] hover:text-[#e85d26] transition-all"
+              className="btn btn-secondary flex items-center justify-center gap-2 h-12 px-5 rounded-2xl font-bold text-xs w-full sm:w-auto hover:border-[#e85d26] hover:text-[#e85d26] transition-all"
             >
               {isResetting ? (
                 <Loader2 size={15} className="animate-spin text-[#e85d26]" />
               ) : (
                 <RotateCcw size={15} className="text-[#e85d26]" />
               )}
-              <span>Submit Another Poll Response</span>
+              <span>Vote Again with Another Email</span>
             </button>
 
             <Link

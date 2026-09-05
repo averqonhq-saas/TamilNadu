@@ -21,11 +21,11 @@ export default async function IdeasPage() {
       <Navbar campaignStatus={campaignStatus} />
       <main id="main-content" className="bg-[#f8f7f4]">
         {/* Ambient Dark Hero Header */}
-        <div className="relative bg-[#060913] text-white pt-20 sm:pt-24 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
+        <div className="relative bg-[#060913] text-white pt-32 sm:pt-40 lg:pt-44 pb-14 sm:pb-18 lg:pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_50%_-10%,rgba(232,93,38,0.16),transparent)]" aria-hidden="true" />
           <div className="absolute top-1/2 right-10 w-80 h-80 bg-[#e85d26]/10 rounded-full blur-[130px] pointer-events-none hidden sm:block" aria-hidden="true" />
 
-          <div className="container relative z-10 mt-6 sm:mt-0">
+          <div className="container relative z-10 pt-4 sm:pt-6">
             <div className="max-w-3xl space-y-4">
               <div className="flex flex-wrap items-center gap-2.5">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.08] border border-white/15 text-[12px] text-white/90 font-bold uppercase tracking-wider">
