@@ -110,6 +110,9 @@ export default function AdminCommunicationsPage() {
         const data = await res.json();
         setInquiries(data.inquiries || []);
         if (data.counts) setCounts(data.counts);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.warn("Failed to load inquiries:", res.status, errData);
       }
     } catch (err) {
       console.error("Failed to load inquiries:", err);
@@ -395,16 +398,25 @@ export default function AdminCommunicationsPage() {
                         >
                           <td className="py-4 px-6">
                             <div className="flex flex-col gap-1">
-                              <span
-                                className={`font-mono text-[11px] font-bold px-2 py-0.5 rounded w-fit ${
-                                  isPartner
-                                    ? "bg-[#16a34a]/10 text-[#16a34a] border border-[#16a34a]/20"
-                                    : "bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20"
-                                }`}
-                              >
-                                {isPartner ? "🤝 PARTNER" : "📩 CONTACT"}
+                              <div className="flex flex-wrap items-center gap-1">
+                                <span
+                                  className={`font-mono text-[11px] font-bold px-2 py-0.5 rounded w-fit ${
+                                    isPartner
+                                      ? "bg-[#16a34a]/10 text-[#16a34a] border border-[#16a34a]/20"
+                                      : "bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20"
+                                  }`}
+                                >
+                                  {isPartner ? "🤝 PARTNER" : "📩 CONTACT"}
+                                </span>
+                                {inq.subject?.toLowerCase().includes("government") && (
+                                  <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded w-fit bg-amber-500/15 text-amber-800 border border-amber-500/30">
+                                    🏛️ GOVT OFFICIAL
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-mono text-xs text-[#64748b]" title={inq.id}>
+                                #{inq.id.length > 12 ? inq.id.slice(0, 8).toUpperCase() : inq.id}
                               </span>
-                              <span className="font-mono text-xs text-[#64748b]">#{inq.id}</span>
                             </div>
                           </td>
 
@@ -610,7 +622,14 @@ export default function AdminCommunicationsPage() {
                   >
                     {selectedInquiry.type === "PARTNER" ? "🤝 PARTNERSHIP APPLICATION" : "📩 CITIZEN CONTACT"}
                   </span>
-                  <span className="font-mono text-xs text-[#64748b]">#{selectedInquiry.id}</span>
+                  {selectedInquiry.subject?.toLowerCase().includes("government") && (
+                    <span className="font-mono text-[11px] font-bold px-2.5 py-0.5 rounded bg-amber-500/15 text-amber-800 border border-amber-500/30">
+                      🏛️ GOVT OFFICIAL
+                    </span>
+                  )}
+                  <span className="font-mono text-xs text-[#64748b]" title={selectedInquiry.id}>
+                    #{selectedInquiry.id.length > 12 ? selectedInquiry.id.slice(0, 8).toUpperCase() : selectedInquiry.id}
+                  </span>
                 </div>
                 <h2 className="font-jakarta font-extrabold text-[22px] text-[#0a0e1a]">
                   {selectedInquiry.subject || selectedInquiry.organization || "Inquiry Details"}

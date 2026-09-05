@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateInquiry, deleteInquiry } from "@/lib/data/inquiries";
+import { updateInquiry, deleteInquiry, Inquiry } from "@/lib/data/inquiries";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
@@ -7,7 +7,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await verifyAdminSession(req, "ADMIN");
+  const auth = await verifyAdminSession(req, "REVIEWER", false);
   if (!auth.authorized) return auth.response;
 
   try {
@@ -20,12 +20,21 @@ export async function PATCH(
     if (admin_notes !== undefined) updates.admin_notes = admin_notes;
     if (status === "RESPONDED") updates.responded_at = new Date().toISOString();
 
-    const updated = updateInquiry(id, updates);
+    let updated = updateInquiry(id, updates);
 
     if (isSupabaseConfigured()) {
       try {
         const supabase = createServiceClient();
-        await supabase.from("inquiries").update(updates).eq("id", id);
+        const { data: dbData, error: dbErr } = await supabase
+          .from("inquiries")
+          .update(updates)
+          .eq("id", id)
+          .select()
+          .single();
+
+        if (!dbErr && dbData) {
+          updated = dbData as Inquiry;
+        }
 
         await supabase.from("audit_logs").insert({
           admin_id: auth.admin.id || auth.admin.email,
@@ -60,7 +69,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await verifyAdminSession(req, "ADMIN");
+  const auth = await verifyAdminSession(req, "ADMIN", false);
   if (!auth.authorized) return auth.response;
 
   try {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, CheckCircle2, Loader2, Building, User, Mail, Briefcase, MessageSquare, Phone } from "lucide-react";
+import { Send, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function PartnerForm() {
@@ -104,18 +104,15 @@ export default function PartnerForm() {
         <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1.5" htmlFor="org">
           Organization / Institution <span className="text-[#e85d26]">*</span>
         </label>
-        <div className="relative">
-          <Building size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-          <input
-            id="org"
-            type="text"
-            className="input pl-10 text-sm h-11"
-            placeholder="e.g. Dept of Transport / University Lab / NGO"
-            value={form.organization}
-            onChange={(e) => setForm({ ...form, organization: e.target.value })}
-            required
-          />
-        </div>
+        <input
+          id="org"
+          type="text"
+          className="input text-sm h-11"
+          placeholder="e.g. Dept of Transport / University Lab / NGO"
+          value={form.organization}
+          onChange={(e) => setForm({ ...form, organization: e.target.value })}
+          required
+        />
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -123,36 +120,30 @@ export default function PartnerForm() {
           <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1.5" htmlFor="pname">
             Contact Person <span className="text-[#e85d26]">*</span>
           </label>
-          <div className="relative">
-            <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <input
-              id="pname"
-              type="text"
-              className="input pl-10 text-sm h-11"
-              placeholder="e.g. Dr. K. Swaminathan"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </div>
+          <input
+            id="pname"
+            type="text"
+            className="input text-sm h-11"
+            placeholder="e.g. Dr. K. Swaminathan"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
         </div>
 
         <div>
           <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1.5" htmlFor="pemail">
             Official Email <span className="text-[#e85d26]">*</span>
           </label>
-          <div className="relative">
-            <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <input
-              id="pemail"
-              type="email"
-              className="input pl-10 text-sm h-11"
-              placeholder="you@institution.org"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
-          </div>
+          <input
+            id="pemail"
+            type="email"
+            className="input text-sm h-11"
+            placeholder="you@institution.org"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
         </div>
       </div>
 
@@ -161,17 +152,14 @@ export default function PartnerForm() {
           <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1.5" htmlFor="role">
             Role / Designation
           </label>
-          <div className="relative">
-            <Briefcase size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <input
-              id="role"
-              type="text"
-              className="input pl-10 text-sm h-11"
-              placeholder="e.g. Director / Research Lead"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            />
-          </div>
+          <input
+            id="role"
+            type="text"
+            className="input text-sm h-11"
+            placeholder="e.g. Director / Research Lead"
+            value={form.role}
+            onChange={(e) => setForm({ ...form, role: e.target.value })}
+          />
         </div>
 
         <div>

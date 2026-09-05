@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, CheckCircle2, Loader2, Sparkles, MessageSquare, MapPin, Mail, Phone, User } from "lucide-react";
+import { Send, CheckCircle2, Loader2 } from "lucide-react";
 import { TAMIL_NADU_DISTRICTS } from "@/lib/constants/districts";
 import { toast } from "sonner";
 
@@ -20,7 +20,7 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -30,10 +30,15 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          name: form.name.trim(),
+          email: form.email.trim(),
+          message: form.message.trim(),
+        }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Failed to submit inquiry");
 
       setInquiryId(data.inquiry?.id || "INQ-2026-CONFIRMED");
@@ -54,8 +59,11 @@ export default function ContactForm() {
         </div>
 
         <div>
-          <span className="font-mono text-xs font-bold text-[#e85d26] bg-[#e85d26]/10 px-3 py-1 rounded-full">
-            Ticket #{inquiryId}
+          <span
+            className="font-mono text-xs font-bold text-[#e85d26] bg-[#e85d26]/10 px-3 py-1 rounded-full"
+            title={inquiryId}
+          >
+            Ticket #{inquiryId.length > 12 ? inquiryId.slice(0, 8).toUpperCase() : inquiryId}
           </span>
           <h3 className="font-jakarta font-extrabold text-[24px] text-[#0a0e1a] mt-3 mb-1">
             Vanakkam! Your message has reached our team.
@@ -107,36 +115,30 @@ export default function ContactForm() {
           <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1" htmlFor="c-name">
             Full Name <span className="text-[#e85d26]">*</span>
           </label>
-          <div className="relative">
-            <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <input
-              id="c-name"
-              type="text"
-              required
-              className="input pl-10 text-sm h-11"
-              placeholder="e.g. Senthil Nathan"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </div>
+          <input
+            id="c-name"
+            type="text"
+            required
+            className="input text-sm h-11"
+            placeholder="e.g. Senthil Nathan"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
         </div>
 
         <div>
           <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1" htmlFor="c-email">
             Email Address <span className="text-[#e85d26]">*</span>
           </label>
-          <div className="relative">
-            <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <input
-              id="c-email"
-              type="email"
-              required
-              className="input pl-10 text-sm h-11"
-              placeholder="senthil@example.com"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </div>
+          <input
+            id="c-email"
+            type="email"
+            required
+            className="input text-sm h-11"
+            placeholder="senthil@example.com"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
         </div>
       </div>
 
@@ -152,6 +154,7 @@ export default function ContactForm() {
             onChange={(e) => setForm({ ...form, subject: e.target.value })}
           >
             <option value="General Inquiry">General Inquiry</option>
+            <option value="Government Officials">Government Officials</option>
             <option value="Idea & Problem Intake Question">Idea &amp; Problem Intake Question</option>
             <option value="Public Voting & Ballot Verification">Public Voting &amp; Ballot Verification</option>
             <option value="Press & Media Coverage">Press &amp; Media Coverage</option>
@@ -164,21 +167,18 @@ export default function ContactForm() {
           <label className="block text-[13px] font-bold text-[#0a0e1a] mb-1" htmlFor="c-district">
             Your District (Optional)
           </label>
-          <div className="relative">
-            <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <select
-              id="c-district"
-              className="input pl-10 text-sm h-11 bg-white font-medium"
-              value={form.district}
-              onChange={(e) => setForm({ ...form, district: e.target.value })}
-            >
-              {TAMIL_NADU_DISTRICTS.map((d) => (
-                <option key={d.name} value={d.name}>
-                  {d.name} ({d.nameTamil})
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            id="c-district"
+            className="input text-sm h-11 bg-white font-medium"
+            value={form.district}
+            onChange={(e) => setForm({ ...form, district: e.target.value })}
+          >
+            {TAMIL_NADU_DISTRICTS.map((d) => (
+              <option key={d.name} value={d.name}>
+                {d.name} ({d.nameTamil})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

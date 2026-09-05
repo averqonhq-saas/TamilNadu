@@ -1,7 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ContactForm from "@/components/contact/ContactForm";
-import { Mail, MessageSquare, MapPin, Sparkles, ShieldCheck, HeartHandshake } from "lucide-react";
+import { Mail, MessageSquare, MapPin, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -73,32 +73,6 @@ export default function ContactPage() {
                         <Mail size={16} />
                         <span>swayam@wedigistudio.com</span>
                       </a>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-[#f8f7f4] border border-[#e2e8f0]">
-                      <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block mb-1">
-                        Privacy &amp; Data Deletion Requests
-                      </span>
-                      <a
-                        href="mailto:privacy@buildtamilnadu.in"
-                        className="font-semibold text-[#0a0e1a] hover:underline flex items-center gap-2 text-[14px]"
-                      >
-                        <ShieldCheck size={16} className="text-[#3b82f6]" />
-                        <span>privacy@buildtamilnadu.in</span>
-                      </a>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-[#f8f7f4] border border-[#e2e8f0]">
-                      <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block mb-1">
-                        Institutions &amp; Government Partners
-                      </span>
-                      <Link
-                        href="/partner"
-                        className="font-bold text-[#16a34a] hover:underline flex items-center gap-2 text-[14px]"
-                      >
-                        <HeartHandshake size={16} />
-                        <span>Visit Institutional Partner Desk →</span>
-                      </Link>
                     </div>
                   </div>
                 </div>

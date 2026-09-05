@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, User, ShieldCheck, Lock, Check } from "lucide-react";
+import { ShieldCheck, Check } from "lucide-react";
 
 interface StepEmailProps {
   email: string;
@@ -30,20 +30,17 @@ export default function StepEmail({ email, name, consent, onChange }: StepEmailP
           <label htmlFor="email" className="block text-[14px] font-bold text-[#0a0e1a] mb-2">
             Your email address <span className="text-[#e85d26]">*</span>
           </label>
-          <div className="relative">
-            <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-            <input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              className="input pl-10.5 h-12 text-[15px]"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => onChange(e.target.value, name, consent)}
-              required
-            />
-          </div>
+          <input
+            id="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            className="input h-12 text-[15px]"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => onChange(e.target.value, name, consent)}
+            required
+          />
         </div>
 
         {/* Optional name */}
@@ -60,18 +57,15 @@ export default function StepEmail({ email, name, consent, onChange }: StepEmailP
             <label htmlFor="name" className="block text-[14px] font-bold text-[#0a0e1a] mb-2">
               Your name <span className="text-[#94a3b8] font-normal">(optional)</span>
             </label>
-            <div className="relative">
-              <User size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                className="input pl-10.5 h-12 text-[15px]"
-                placeholder="Citizen name / pseudonym"
-                value={name}
-                onChange={(e) => onChange(email, e.target.value, consent)}
-              />
-            </div>
+            <input
+              id="name"
+              type="text"
+              autoComplete="name"
+              className="input h-12 text-[15px]"
+              placeholder="Citizen name / pseudonym"
+              value={name}
+              onChange={(e) => onChange(email, e.target.value, consent)}
+            />
           </div>
         )}
 

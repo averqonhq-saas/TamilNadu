@@ -113,11 +113,11 @@ export default function IdeaBoard() {
         <div className="relative flex-1">
           <Search
             size={17}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none"
           />
           <input
             type="search"
-            className="input pl-10 h-11 text-[14px]"
+            className="input pl-11 h-11 text-[14px]"
             placeholder="Search problems, keywords, public IDs..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}

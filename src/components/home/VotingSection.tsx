@@ -285,7 +285,7 @@ export default function VotingSection({
                   </Link>
                   <Link
                     href="/submit"
-                    className="btn btn-secondary border-white/20 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 h-12 px-5 rounded-2xl font-bold text-[13.5px] w-full sm:w-auto justify-center"
+                    className="inline-flex items-center gap-2 h-12 px-5 rounded-2xl font-bold text-[13.5px] text-white bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 transition-all w-full sm:w-auto justify-center"
                   >
                     <Lightbulb size={15} className="text-[#fb923c]" />
                     <span>Submit an Idea</span>

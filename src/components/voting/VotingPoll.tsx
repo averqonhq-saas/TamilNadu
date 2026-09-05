@@ -489,19 +489,16 @@ export default function VotingPoll({
                 <label htmlFor="voter-email" className="block text-[13.5px] font-bold text-[#0a0e1a] mb-1.5">
                   Enter your email address to record your choice:
                 </label>
-                <div className="relative">
-                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
-                  <input
-                    id="voter-email"
-                    type="email"
-                    required
-                    disabled={otpSent || isSubmitting}
-                    className="input pl-10 h-11 text-[14px]"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+                <input
+                  id="voter-email"
+                  type="email"
+                  required
+                  disabled={otpSent || isSubmitting}
+                  className="input h-11 text-[14px]"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
                 <p className="text-[12px] text-[#64748b] mt-1.5">
                   We use your email strictly to verify 1-person-1-vote and update you when Tamil Nadu&apos;s choice is announced. No spam.
                 </p>

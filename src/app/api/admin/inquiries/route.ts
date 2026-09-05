@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStoredInquiries, InquiryStatus, InquiryType } from "@/lib/data/inquiries";
+import { getStoredInquiries, Inquiry, InquiryStatus, InquiryType } from "@/lib/data/inquiries";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
-  const auth = await verifyAdminSession(req, "ADMIN");
+  const auth = await verifyAdminSession(req, "REVIEWER", false);
   if (!auth.authorized) return auth.response;
 
   try {
@@ -13,55 +13,61 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status") as InquiryStatus | null;
     const search = searchParams.get("search")?.toLowerCase().trim();
 
-    let list = getStoredInquiries();
+    let allInquiries: Inquiry[] = [];
 
     if (isSupabaseConfigured()) {
       try {
         const supabase = createServiceClient();
-        let query = supabase.from("inquiries").select("*").order("created_at", { ascending: false });
-        if (type) query = query.eq("type", type);
-        if (status) query = query.eq("status", status);
+        const { data, error } = await supabase
+          .from("inquiries")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-        const { data, error } = await query;
-        if (!error && data && data.length > 0) {
-          list = data;
+        if (!error && data) {
+          allInquiries = data as Inquiry[];
         }
       } catch (dbErr) {
         console.warn("DB inquiries fetch fallback:", dbErr);
       }
     }
 
-    if (type) {
-      list = list.filter((i) => i.type === type);
-    }
-
-    if (status) {
-      list = list.filter((i) => i.status === status);
-    }
-
-    if (search) {
-      list = list.filter(
-        (i) =>
-          i.name.toLowerCase().includes(search) ||
-          i.email.toLowerCase().includes(search) ||
-          i.organization?.toLowerCase().includes(search) ||
-          i.subject?.toLowerCase().includes(search) ||
-          i.message.toLowerCase().includes(search) ||
-          i.id.toLowerCase().includes(search)
-      );
+    if (allInquiries.length === 0) {
+      allInquiries = getStoredInquiries();
     }
 
     const counts = {
-      total: list.length,
-      contact: list.filter((i) => i.type === "CONTACT").length,
-      partner: list.filter((i) => i.type === "PARTNER").length,
-      new: list.filter((i) => i.status === "NEW").length,
-      in_review: list.filter((i) => i.status === "IN_REVIEW").length,
-      responded: list.filter((i) => i.status === "RESPONDED").length,
+      total: allInquiries.length,
+      contact: allInquiries.filter((i) => i.type === "CONTACT").length,
+      partner: allInquiries.filter((i) => i.type === "PARTNER").length,
+      new: allInquiries.filter((i) => i.status === "NEW").length,
+      in_review: allInquiries.filter((i) => i.status === "IN_REVIEW").length,
+      responded: allInquiries.filter((i) => i.status === "RESPONDED").length,
     };
 
+    let filtered = [...allInquiries];
+
+    if (type) {
+      filtered = filtered.filter((i) => i.type === type);
+    }
+
+    if (status) {
+      filtered = filtered.filter((i) => i.status === status);
+    }
+
+    if (search) {
+      filtered = filtered.filter(
+        (i) =>
+          i.name?.toLowerCase().includes(search) ||
+          i.email?.toLowerCase().includes(search) ||
+          i.organization?.toLowerCase().includes(search) ||
+          i.subject?.toLowerCase().includes(search) ||
+          i.message?.toLowerCase().includes(search) ||
+          i.id?.toLowerCase().includes(search)
+      );
+    }
+
     return NextResponse.json({
-      inquiries: list,
+      inquiries: filtered,
       counts,
     });
   } catch (error: any) {

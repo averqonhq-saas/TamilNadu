@@ -29,6 +29,7 @@ export default async function AdminLayout({
     activeDistrictsCount: 0,
     totalDistricts: 38,
     adminsCount: 1,
+    inquiriesCount: 0,
   };
 
   try {
@@ -53,6 +54,7 @@ export default async function AdminLayout({
         { count: activeCategories },
         { data: districtData },
         { count: adminUsersTotal },
+        { count: newInquiriesTotal },
       ] = await Promise.all([
         supabase.from("ideas").select("*", { count: "exact", head: true }),
         supabase.from("idea_groups").select("*", { count: "exact", head: true }),
@@ -60,6 +62,7 @@ export default async function AdminLayout({
         supabase.from("categories").select("*", { count: "exact", head: true }).eq("active", true),
         supabase.from("ideas").select("district"),
         supabase.from("admin_users").select("*", { count: "exact", head: true }),
+        supabase.from("inquiries").select("*", { count: "exact", head: true }).eq("status", "NEW"),
       ]);
 
       initialStats.ideasCount = ideasTotal ?? 0;
@@ -67,6 +70,7 @@ export default async function AdminLayout({
       initialStats.shortlistCount = shortlistedTotal ?? 0;
       initialStats.categoriesCount = activeCategories ?? 8;
       initialStats.adminsCount = adminUsersTotal && adminUsersTotal > 0 ? adminUsersTotal : 1;
+      initialStats.inquiriesCount = newInquiriesTotal ?? 0;
 
       if (districtData) {
         const unique = new Set(

@@ -94,7 +94,7 @@ export default function CtaSection({ campaignStatus = "COLLECTING" }: CtaSection
           {campaignStatus === "VOTING" && (
             <Link
               href="/submit"
-              className="btn btn-secondary border-white/20 text-white hover:bg-white/10 py-3.5 px-6 sm:py-[18px] sm:px-8 font-bold text-[15px]"
+              className="inline-flex items-center justify-center font-bold text-white bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 transition-all rounded-xl sm:rounded-2xl py-3.5 px-6 sm:py-[18px] sm:px-8 text-[15px] sm:text-[17px] shadow-sm backdrop-blur-xs"
             >
               Submit an Idea for Next Cycle →
             </Link>

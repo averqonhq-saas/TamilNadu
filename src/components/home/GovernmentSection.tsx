@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-
 export default function GovernmentSection() {
   return (
     <section className="section bg-white border-t border-[#e2e8f0]" aria-labelledby="gov-heading">
@@ -19,18 +16,10 @@ export default function GovernmentSection() {
               We can research, design and build technology. But solutions that can serve millions of 
               people often need collaboration between builders, institutions, and government.
             </p>
-            <p className="text-[#64748b] text-[15px] sm:text-[16px] leading-relaxed mb-8">
+            <p className="text-[#64748b] text-[15px] sm:text-[16px] leading-relaxed">
               If you represent an organization, institution, or government body and are interested in 
               what comes out of this initiative, we'd like to hear from you.
             </p>
-            <Link
-              href="/partner"
-              className="btn btn-secondary group"
-              id="gov-cta"
-            >
-              For Government & Institutions
-              <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </Link>
           </div>
 
           {/* Right: Story flow */}

@@ -85,10 +85,10 @@ export default function StepLocation({ value, onChange }: StepLocationProps) {
 
       {/* Search district input */}
       <div className="relative mb-3">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none" />
         <input
           type="search"
-          className="input pl-10 text-[14px]"
+          className="input pl-11 text-[14px]"
           placeholder="Filter 38 districts (e.g. Madurai, Salem, Coimbatore...)"
           value={districtSearch}
           onChange={(e) => setDistrictSearch(e.target.value)}

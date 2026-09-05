@@ -74,8 +74,8 @@ export default function PrivacyPage() {
 
               <Section title="Data retention">
                 <p>
-                  We retain submitted ideas and associated contact information for the duration of the campaign 
-                  and for a reasonable period thereafter to fulfill campaign obligations (e.g., notifying voters of results, 
+                  We retain submitted ideas and associated contact information for the duration of the campaign
+                  and for a reasonable period thereafter to fulfill campaign obligations (e.g., notifying voters of results,
                   updating submitters on product progress).
                 </p>
                 <p className="mt-3">
@@ -90,12 +90,12 @@ export default function PrivacyPage() {
                   <li>You may request deletion of your personal data.</li>
                   <li>You may withdraw your consent to email communications at any time.</li>
                 </ul>
-                <p className="mt-3">To exercise any of these rights, contact us at <a href="mailto:privacy@buildtamilnadu.in" className="text-[#e85d26] hover:underline">privacy@buildtamilnadu.in</a>.</p>
+                <p className="mt-3">To exercise any of these rights, contact us at <a href="mailto:swayam@wedigistudio.com" className="text-[#e85d26] hover:underline">swayam@wedigistudio.com</a>.</p>
               </Section>
 
               <Section title="Independence">
                 <p>
-                  Build Tamil Nadu is an independent initiative by WeDigi. It is not an official government 
+                  Build Tamil Nadu is an independent initiative by WeDigi. It is not an official government
                   platform. Your data is held by WeDigi and is not shared with any government department.
                 </p>
               </Section>

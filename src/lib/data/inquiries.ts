@@ -24,12 +24,13 @@ export function getStoredInquiries(): Inquiry[] {
   return [...inquiriesStore];
 }
 
-export function addInquiry(inquiryData: Omit<Inquiry, "id" | "created_at" | "status">): Inquiry {
-  const prefix = inquiryData.type === "PARTNER" ? "PRT" : "INQ";
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+export function addInquiry(
+  inquiryData: Omit<Inquiry, "id" | "created_at" | "status">,
+  customId?: string
+): Inquiry {
   const newInquiry: Inquiry = {
     ...inquiryData,
-    id: `${prefix}-2026-${randomSuffix}`,
+    id: customId || crypto.randomUUID(),
     status: "NEW",
     created_at: new Date().toISOString(),
   };

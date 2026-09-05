@@ -190,6 +190,17 @@
   border-color: var(--color-navy-600);
 }
 
+.btn-secondary.text-white {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-secondary.text-white:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff !important;
+}
+
 .btn-ghost {
   background-color: transparent;
   color: var(--color-muted);
@@ -270,6 +281,33 @@
   color: var(--color-navy);
   transition: all 0.2s ease;
   outline: none;
+}
+
+/* Explicit input padding overrides when icons are positioned inside inputs */
+.input.pl-9,
+.input[class*="pl-9"] {
+  padding-left: 2.375rem !important;
+}
+
+.input.pl-10,
+.input[class*="pl-10"],
+.input.pl-10\.5,
+.input[class*="pl-10.5"],
+.input.pl-11,
+.input[class*="pl-11"] {
+  padding-left: 2.75rem !important; /* 44px cleanly clears icons positioned at left-3.5 */
+}
+
+.input.pl-12,
+.input[class*="pl-12"] {
+  padding-left: 3rem !important;
+}
+
+select.input.pl-10,
+select.input[class*="pl-10"],
+select.input.pl-11,
+select.input[class*="pl-11"] {
+  padding-left: 2.75rem !important;
 }
 
 .input::placeholder {

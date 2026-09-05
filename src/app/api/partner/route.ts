@@ -5,13 +5,20 @@ import { createServiceClient, isSupabaseConfigured } from "@/lib/supabase/server
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { organization, name, email, role, phone, message, district, track } = body;
+    const organization = typeof body.organization === "string" ? body.organization.trim() : "";
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const role = typeof body.role === "string" ? body.role.trim() : "Representative";
+    const phone = typeof body.phone === "string" ? body.phone.trim() : undefined;
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+    const district = typeof body.district === "string" ? body.district.trim() : undefined;
+    const track = typeof body.track === "string" ? body.track.trim() : "";
 
-    if (!organization || !organization.trim()) {
+    if (!organization) {
       return NextResponse.json({ error: "Please provide your organization or department name." }, { status: 400 });
     }
 
-    if (!name || !name.trim()) {
+    if (!name) {
       return NextResponse.json({ error: "Please provide the primary contact person's name." }, { status: 400 });
     }
 
@@ -19,42 +26,53 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please provide a valid official email address." }, { status: 400 });
     }
 
-    if (!message || message.trim().length < 5) {
+    if (!message) {
       return NextResponse.json({ error: "Please describe your partnership interest or proposal." }, { status: 400 });
     }
 
-    const newInquiry = addInquiry({
-      type: "PARTNER",
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone?.trim() || undefined,
-      organization: organization.trim(),
-      role: role?.trim() || "Representative",
-      subject: track ? `Partnership Track: ${track}` : `Partnership Proposal from ${organization.trim()}`,
-      message: message.trim(),
-      district: district?.trim() || undefined,
-    });
+    let dbInquiryId: string | undefined = undefined;
 
     if (isSupabaseConfigured()) {
       try {
         const supabase = createServiceClient();
-        await supabase.from("inquiries").insert({
-          id: newInquiry.id,
-          type: "PARTNER",
-          name: newInquiry.name,
-          email: newInquiry.email,
-          phone: newInquiry.phone,
-          organization: newInquiry.organization,
-          role: newInquiry.role,
-          subject: newInquiry.subject,
-          message: newInquiry.message,
-          district: newInquiry.district,
-          status: "NEW",
-        });
+        const { data: dbData, error: dbErr } = await supabase
+          .from("inquiries")
+          .insert({
+            type: "PARTNER",
+            name,
+            email,
+            phone: phone || null,
+            organization,
+            role,
+            subject: track ? `Partnership Track: ${track}` : `Partnership Proposal from ${organization}`,
+            message,
+            district: district || null,
+            status: "NEW",
+          })
+          .select("id")
+          .single();
+
+        if (dbErr) {
+          console.error("Supabase partner insert error:", dbErr);
+        } else if (dbData?.id) {
+          dbInquiryId = dbData.id;
+        }
       } catch (dbErr) {
         console.warn("DB partner insert fallback:", dbErr);
       }
     }
+
+    const newInquiry = addInquiry({
+      type: "PARTNER",
+      name,
+      email,
+      phone: phone || undefined,
+      organization,
+      role,
+      subject: track ? `Partnership Track: ${track}` : `Partnership Proposal from ${organization}`,
+      message,
+      district: district || undefined,
+    }, dbInquiryId);
 
     return NextResponse.json({
       success: true,

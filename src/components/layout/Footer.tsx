@@ -88,7 +88,6 @@ export default function Footer({
               <FooterLink href="/ideas">Explore Ideas</FooterLink>
               <FooterLink href="/vote">Public Voting</FooterLink>
               <FooterLink href="/about">About</FooterLink>
-              <FooterLink href="/partner">Partner With Us</FooterLink>
             </ul>
           </div>
 
