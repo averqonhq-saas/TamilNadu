@@ -58,11 +58,22 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   useEffect(() => {
     async function loadIdea() {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/admin/ideas/${id}`);
+        const res = await fetch(`/api/admin/ideas/${id}`, {
+          headers: getAuthHeaders(),
+        });
         if (res.ok) {
           const data = await res.json();
           if (data && data.id) {
@@ -84,7 +95,7 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
     try {
       const res = await fetch(`/api/admin/ideas/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
           status: newStatus,
           ...(newVisibility && { visibility: newVisibility }),
@@ -115,7 +126,7 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
     try {
       const res = await fetch(`/api/admin/ideas/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ internal_notes: notes }),
       });
       if (!res.ok) throw new Error("Notes save failed");
@@ -140,6 +151,7 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
     try {
       const res = await fetch(`/api/admin/ideas/${id}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
 
       if (!res.ok) {

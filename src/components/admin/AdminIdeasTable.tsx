@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { formatRelativeDate } from "@/lib/utils";
 import { Eye, Check, X, Star, Trash2, Globe } from "lucide-react";
@@ -49,15 +50,29 @@ export default function AdminIdeasTable({
     setCurrentIdeas(ideas);
   }, [ideas]);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const updateIdea = async (
     id: string,
     updates: { status?: string; visibility?: string }
   ) => {
     setLoadingId(id);
     try {
+      const headers = {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      };
+
       const res = await fetch(`/api/admin/ideas/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(updates),
       });
 
@@ -87,6 +102,7 @@ export default function AdminIdeasTable({
     try {
       const res = await fetch(`/api/admin/ideas/${id}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
 
       if (!res.ok) {
@@ -140,12 +156,13 @@ export default function AdminIdeasTable({
                       {idea.public_id}
                     </td>
                     <td className="px-4 py-3 max-w-xs">
-                      <a
+                      <Link
                         href={`/admin/ideas/${idea.id}`}
                         className="font-medium text-[#0a0e1a] hover:text-[#e85d26] transition-colors line-clamp-2"
+                        title="View submission details"
                       >
                         {idea.title}
-                      </a>
+                      </Link>
                     </td>
                     <td className="px-4 py-3 text-[#64748b]">
                       {idea.categories?.name || "—"}
@@ -181,13 +198,13 @@ export default function AdminIdeasTable({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         {/* View */}
-                        <a
+                        <Link
                           href={`/admin/ideas/${idea.id}`}
-                          className="btn btn-icon btn-ghost text-[#64748b] hover:text-[#0a0e1a]"
-                          title="View"
+                          className="btn btn-icon btn-ghost text-[#64748b] hover:text-[#0a0e1a] hover:bg-slate-100"
+                          title="View Idea Details"
                         >
-                          <Eye size={14} />
-                        </a>
+                          <Eye size={15} />
+                        </Link>
 
                         {/* Make public */}
                         {idea.visibility !== "PUBLIC" && (
@@ -234,9 +251,9 @@ export default function AdminIdeasTable({
                           onClick={() => deleteIdea(idea.id, idea.title)}
                           disabled={isLoading}
                           className="btn btn-icon btn-ghost text-rose-500 hover:text-rose-700 hover:bg-rose-50"
-                          title="Delete Idea"
+                          title="Delete Idea permanently"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>

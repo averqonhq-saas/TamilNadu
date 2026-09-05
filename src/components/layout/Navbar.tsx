@@ -148,9 +148,11 @@ export default function Navbar({ campaignStatus: initialStatus = DEFAULT_CAMPAIG
               <NavLink href="/about" isDark={useDarkNav}>
                 About
               </NavLink>
-              <NavLink href="/submit" isDark={useDarkNav}>
-                Share an Idea
-              </NavLink>
+              {campaignStatus === "VOTING" && (
+                <NavLink href="/submit" isDark={useDarkNav}>
+                  Share an Idea
+                </NavLink>
+              )}
               <span className={`mx-2 text-[13px] ${useDarkNav ? "text-white/20" : "text-[#e2e8f0]"}`}>
                 |
               </span>
@@ -254,9 +256,11 @@ export default function Navbar({ campaignStatus: initialStatus = DEFAULT_CAMPAIG
             <MobileNavLink href="/about" onClick={() => setIsMobileOpen(false)}>
               About the Initiative
             </MobileNavLink>
-            <MobileNavLink href="/submit" onClick={() => setIsMobileOpen(false)}>
-              Share an Idea / Problem
-            </MobileNavLink>
+            {campaignStatus === "VOTING" && (
+              <MobileNavLink href="/submit" onClick={() => setIsMobileOpen(false)}>
+                Share an Idea / Problem
+              </MobileNavLink>
+            )}
             <div className="pt-3 pb-1">
               <Link
                 href="/vote"

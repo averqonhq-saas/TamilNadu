@@ -518,19 +518,39 @@ export const INITIAL_MANUAL_GROUPS: ManualGroup[] = [
   },
 ];
 
-// Global in-memory stores for runtime lifecycle
-let groupsStore: ManualGroup[] = JSON.parse(JSON.stringify(INITIAL_MANUAL_GROUPS));
-let ideasStore: GroupableIdea[] = JSON.parse(JSON.stringify(INITIAL_CITIZEN_IDEAS));
+// Global in-memory stores for runtime lifecycle, backed by globalThis
+declare global {
+  // eslint-disable-next-line no-var
+  var __btn_groupsStore: ManualGroup[] | undefined;
+  // eslint-disable-next-line no-var
+  var __btn_ideasStore: GroupableIdea[] | undefined;
+}
+
+if (!globalThis.__btn_groupsStore) {
+  globalThis.__btn_groupsStore = JSON.parse(JSON.stringify(INITIAL_MANUAL_GROUPS));
+}
+if (!globalThis.__btn_ideasStore) {
+  globalThis.__btn_ideasStore = JSON.parse(JSON.stringify(INITIAL_CITIZEN_IDEAS));
+}
+
+let groupsStore: ManualGroup[] = globalThis.__btn_groupsStore!;
+let ideasStore: GroupableIdea[] = globalThis.__btn_ideasStore!;
 
 export function getStoredGroups(): ManualGroup[] {
+  if (globalThis.__btn_groupsStore) {
+    groupsStore = globalThis.__btn_groupsStore;
+  }
   return groupsStore;
 }
 
 export function getStoredGroupById(id: string): ManualGroup | undefined {
-  return groupsStore.find((g) => g.id === id);
+  return getStoredGroups().find((g) => g.id === id);
 }
 
 export function getStoredIdeas(): GroupableIdea[] {
+  if (globalThis.__btn_ideasStore) {
+    ideasStore = globalThis.__btn_ideasStore;
+  }
   return ideasStore;
 }
 
@@ -736,30 +756,58 @@ function syncGroupCounts(grp: ManualGroup) {
 }
 
 export function updateStoredIdea(id: string, updates: Partial<GroupableIdea>): GroupableIdea | null {
-  const idx = ideasStore.findIndex((i) => i.id === id || i.public_id === id);
+  const store = getStoredIdeas();
+  const targetId = id.trim().toLowerCase();
+  const idx = store.findIndex(
+    (i) =>
+      i.id === id ||
+      i.public_id === id ||
+      i.id.toLowerCase() === targetId ||
+      i.public_id.toLowerCase() === targetId
+  );
   if (idx === -1) return null;
 
-  ideasStore[idx] = {
-    ...ideasStore[idx],
+  store[idx] = {
+    ...store[idx],
     ...updates,
   };
-  return ideasStore[idx];
+  globalThis.__btn_ideasStore = store;
+  ideasStore = store;
+  return store[idx];
 }
 
 export function deleteStoredIdea(id: string): boolean {
-  const initialLength = ideasStore.length;
-  ideasStore = ideasStore.filter((i) => i.id !== id && i.public_id !== id);
+  const store = getStoredIdeas();
+  const initialLength = store.length;
+  const targetId = id.trim().toLowerCase();
+
+  const filtered = store.filter((i) => {
+    return !(
+      i.id === id ||
+      i.public_id === id ||
+      i.id.toLowerCase() === targetId ||
+      i.public_id.toLowerCase() === targetId
+    );
+  });
+
+  globalThis.__btn_ideasStore = filtered;
+  ideasStore = filtered;
 
   // Remove from any groups that contain it
-  groupsStore.forEach((grp) => {
-    if (grp.member_idea_ids.includes(id)) {
-      grp.member_idea_ids = grp.member_idea_ids.filter((memberId) => memberId !== id);
+  const groups = getStoredGroups();
+  groups.forEach((grp) => {
+    if (grp.member_idea_ids.some((mid) => mid === id || mid.toLowerCase() === targetId)) {
+      grp.member_idea_ids = grp.member_idea_ids.filter(
+        (mid) => mid !== id && mid.toLowerCase() !== targetId
+      );
       syncGroupCounts(grp);
       grp.updated_at = new Date().toISOString();
     }
   });
+  globalThis.__btn_groupsStore = groups;
+  groupsStore = groups;
 
-  return ideasStore.length < initialLength;
+  return filtered.length < initialLength;
 }
 
 export function addStoredIdea(payload: Partial<GroupableIdea>): GroupableIdea {

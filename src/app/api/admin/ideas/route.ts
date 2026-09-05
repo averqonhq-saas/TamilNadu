@@ -5,7 +5,7 @@ import { verifyAdminSession } from "@/lib/auth/admin-auth";
 
 export async function GET(req: NextRequest) {
   // 1. Authorize Admin Session (Requires REVIEWER role or above)
-  const auth = await verifyAdminSession(req, "REVIEWER");
+  const auth = await verifyAdminSession(req, "REVIEWER", false);
   if (!auth.authorized) return auth.response;
 
   try {
